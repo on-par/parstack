@@ -1,0 +1,103 @@
+name: behavior-evals
+
+# Opt-in: runs real model calls. On a PR it runs only when the PR has the
+# 'run-evals' label; it can also be started by hand.
+on:
+  pull_request:
+    types: [labeled, synchronize, opened, reopened]
+    paths:
+      - "skills/**"
+      - "evals/behavior/**"
+      - "evals/run_behavior.py"
+  workflow_dispatch:
+    inputs:
+      skills:
+        description: "Skill names separated by spaces (empty = all skills with cases)"
+        required: false
+        default: ""
+      model:
+        description: "Model for the agent runs"
+        required: false
+        default: "haiku"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: behavior-evals-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  behavior:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'run-evals')
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Claude Code
+        run: npm i -g @anthropic-ai/claude-code
+
+      - name: Check API key
+        id: key
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::notice::ANTHROPIC_API_KEY is not set; skipping behavior evals."
+            echo "Behavior evals skipped: ANTHROPIC_API_KEY is not set." >> "$GITHUB_STEP_SUMMARY"
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Configure git
+        if: steps.key.outputs.present == 'true'
+        run: |
+          git config --global user.name "ci"
+          git config --global user.email "ci@example.invalid"
+
+      - name: Run behavior evals (pull request)
+        if: steps.key.outputs.present == 'true' && github.event_name == 'pull_request'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          python3 evals/run_behavior.py \
+            --changed-from "origin/$BASE_REF" \
+            --require-api-key \
+            --model haiku \
+            --max-cases-per-skill 1 \
+            --timeout 300 \
+            --max-budget-usd 0.50 \
+            --summary-file "$GITHUB_STEP_SUMMARY"
+
+      - name: Run behavior evals (manual)
+        if: steps.key.outputs.present == 'true' && github.event_name == 'workflow_dispatch'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SKILLS: ${{ inputs.skills }}
+          MODEL: ${{ inputs.model }}
+        run: |
+          set -f
+          skill_args=()
+          for s in $SKILLS; do skill_args+=(--skill "$s"); done
+          python3 evals/run_behavior.py \
+            "${skill_args[@]}" \
+            --require-api-key \
+            --model "${MODEL:-haiku}" \
+            --max-cases-per-skill 1 \
+            --timeout 300 \
+            --max-budget-usd 0.50 \
+            --summary-file "$GITHUB_STEP_SUMMARY"

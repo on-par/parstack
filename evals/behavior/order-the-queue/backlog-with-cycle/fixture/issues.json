@@ -1,0 +1,8 @@
+[
+  {"number": 3, "title": "Add search box", "body": "Text input on the projects page.", "labels": [{"name": "p1"}], "updatedAt": "2026-11-10T09:00:00Z", "state": "OPEN"},
+  {"number": 4, "title": "Search results page", "body": "Depends on #3.", "labels": [], "updatedAt": "2026-11-11T09:00:00Z", "state": "OPEN"},
+  {"number": 5, "title": "Search filters", "body": "Blocked by #3 and #4.", "labels": [], "updatedAt": "2026-11-12T09:00:00Z", "state": "OPEN"},
+  {"number": 6, "title": "Dark mode toggle", "body": "No dependencies.", "labels": [{"name": "p2"}], "updatedAt": "2026-11-09T09:00:00Z", "state": "OPEN"},
+  {"number": 7, "title": "Billing settings page", "body": "Depends on #8.", "labels": [], "updatedAt": "2026-11-08T09:00:00Z", "state": "OPEN"},
+  {"number": 8, "title": "Billing API client", "body": "After #7 lands.", "labels": [], "updatedAt": "2026-11-08T09:00:00Z", "state": "OPEN"}
+]

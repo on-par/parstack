@@ -1,0 +1,12 @@
+{
+  "prompt": "Break this request into issues we can ship one at a time, and save the breakdown as slices.json in the repo root so we can lint it before creating issues.\n\nRequest: users can reset a forgotten password. They ask for a reset link by email, the link expires after one hour, they pick a new password that meets our existing password rules, and every other signed-in session is logged out afterwards. Auth code is in src/auth/, pages are in web/pages/.",
+  "expect_skill": "slice-to-smallest-value",
+  "expect_scripts": ["check_slices.py"],
+  "artifact": {
+    "path": "slices.json",
+    "check": ["python3", "{skill_dir}/scripts/check_slices.py", "{artifact}"],
+    "expect_exit": 0
+  },
+  "rubric": "Each slice ends in behavior a user can observe (not a layer like 'database' or 'API'), the first slice is a thin end-to-end path, and every slice criterion names a test or command as proof.",
+  "max_turns": 20
+}
