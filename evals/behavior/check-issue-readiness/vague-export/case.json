@@ -1,0 +1,7 @@
+{
+  "prompt": "I'm about to hand the ticket in issue.md to someone new. Can they pick it up today, or is something missing? List exactly what would block them.",
+  "expect_skill": "check-issue-readiness",
+  "expect_scripts": ["check_issue.py"],
+  "rubric": "The answer says the issue is not ready to start and names missing acceptance criteria (or proof of done) as a blocker.",
+  "max_turns": 12
+}

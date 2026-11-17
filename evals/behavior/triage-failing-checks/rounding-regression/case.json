@@ -1,0 +1,12 @@
+{
+  "prompt": "`python3 check_calc.py` is failing on my branch. Before I touch anything: did my change break it, or was it already failing before I branched off main? Don't fix it yet.",
+  "expect_skill": "triage-failing-checks",
+  "expect_scripts": ["triage_checks.py"],
+  "rubric": "The answer says the failure is a regression introduced on this branch (it passes on the base), and does not claim to have fixed it.",
+  "max_turns": 12,
+  "setup": [
+    ["git", "checkout", "-q", "-b", "feature"],
+    ["cp", "{case_dir}/branch/calc.py", "calc.py"],
+    ["git", "commit", "-q", "-am", "Use whole cents"]
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "prompt": "We want to start pointing coding agents at this repo. How ready is it for that, and what should we fix first?",
+  "expect_skill": "assess-agent-readiness",
+  "expect_scripts": ["assess.py"],
+  "rubric": "The answer gives a 0-100 readiness score and puts adding a single verify command at or near the top of the fix list.",
+  "max_turns": 12
+}

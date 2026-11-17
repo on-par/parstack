@@ -1,0 +1,7 @@
+{
+  "prompt": "Our open backlog is exported in issues.json. What order should we work through these, and which ones can run at the same time? Point out anything wrong with how they reference each other.",
+  "expect_skill": "order-the-queue",
+  "expect_scripts": ["order_queue.py"],
+  "rubric": "The answer gives an order with items grouped by what can run in parallel, and calls out the dependency cycle between #7 and #8.",
+  "max_turns": 12
+}
