@@ -34,7 +34,7 @@ Pick the one that keeps value visible:
 - **Workflow steps:** ship step 1 end to end, then step 2.
 - **Happy path, then edge cases:** valid input first; errors, limits, retries later.
 - **One variant at a time:** one payment method, one file format, one role, one locale.
-- **Simple rule, then full rule:** flat rate before tiered pricing.
+- **Simple rule, then full rule:** one flat shipping fee before per-region rates.
 - **Defer non-functional work:** correct first, then fast, then scaled. Each is its own slice with a measurable criterion.
 - **Read before write:** show existing data before editing it.
 - **Unknowns:** if a slice cannot be specified, make a timeboxed spike slice whose criterion is a written answer plus a throwaway check, and make the real slices depend on it.
