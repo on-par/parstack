@@ -1,0 +1,6 @@
+{
+  "identifier": "ENG-12",
+  "title": "Export orders as CSV",
+  "description": "Acceptance criteria:\n- Export button downloads visible rows (proof: OrdersExportTests.DownloadsVisibleRows)\n\nScope:\n- Button and endpoint\n\nOut of scope:\n- XLSX\n\nDependencies:\n- None\n",
+  "labels": {"nodes": [{"name": "feature"}]}
+}

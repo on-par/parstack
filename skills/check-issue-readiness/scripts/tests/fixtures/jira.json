@@ -1,0 +1,16 @@
+{
+  "key": "OPS-7",
+  "fields": {
+    "summary": "Rotate API keys",
+    "labels": ["blocked"],
+    "description": {
+      "type": "doc",
+      "content": [
+        {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "Acceptance criteria"}]},
+        {"type": "bulletList", "content": [
+          {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Old key is rejected after rotation (proof: test_old_key_rejected)"}]}]}
+        ]}
+      ]
+    }
+  }
+}
