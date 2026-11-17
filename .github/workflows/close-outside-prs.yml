@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   close:
-    if: ${{ !contains(fromJSON('["patrob","dependabot[bot]"]'), github.event.pull_request.user.login) }}
+    if: ${{ !contains(fromJSON('["patrob","dependabot[bot]","on-par-foreman[bot]"]'), github.event.pull_request.user.login) }}
     runs-on: ubuntu-latest
     steps:
       - name: Close pull request

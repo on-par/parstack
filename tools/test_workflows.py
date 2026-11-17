@@ -10,6 +10,7 @@ from pathlib import Path
 
 WORKFLOWS = Path(__file__).resolve().parent.parent / ".github" / "workflows"
 OWNER = "patrob"
+FOREMAN_BOT = "on-par-foreman[bot]"
 
 
 def read(name: str) -> str:
@@ -104,6 +105,8 @@ class CloseOutsidePrsTest(unittest.TestCase):
         expr = job_if(self.text, "close")
         self.assertFalse(closes(expr, OWNER))
         self.assertFalse(closes(expr, "dependabot[bot]"))
+        self.assertFalse(closes(expr, FOREMAN_BOT))
+        self.assertTrue(closes(expr, "other-app[bot]"))
         self.assertTrue(closes(expr, "random-user"))
         self.assertTrue(closes(expr, "patrob-fan"))
         # Case-insensitive like GitHub's contains(); logins ignore case too.
@@ -132,6 +135,9 @@ class BehaviorEvalsTest(unittest.TestCase):
         self.assertIn("contains(github.event.pull_request.labels.*.name, 'run-evals')", expr)
         self.assertIn(f"github.event.pull_request.user.login == '{OWNER}'", expr)
         self.assertIn("github.event.pull_request.head.repo.full_name == github.repository", expr)
+        # The eval secret stays owner-only; the bot allowed past auto-close
+        # must not be able to trigger it.
+        self.assertNotIn("on-par-foreman", expr)
 
     def test_auth_step_runs_first(self):
         steps = block(self.text, "steps", level=4)
