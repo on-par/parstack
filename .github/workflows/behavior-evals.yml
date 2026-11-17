@@ -94,7 +94,7 @@ jobs:
           ANTHROPIC_API_KEY: ${{ steps.auth.outputs.mode == 'api_key' && secrets.ANTHROPIC_API_KEY || '' }}
           BASE_REF: ${{ github.base_ref }}
         run: |
-          if [ "$AUTH_MODE" = "api_key" ]; then unset CLAUDE_CODE_OAUTH_TOKEN; fi
+          if [ "$AUTH_MODE" = "api_key" ]; then unset CLAUDE_CODE_OAUTH_TOKEN; else unset ANTHROPIC_API_KEY; fi
           python3 evals/run_behavior.py \
             --changed-from "origin/$BASE_REF" \
             --require-auth \
@@ -113,7 +113,7 @@ jobs:
           SKILLS: ${{ inputs.skills }}
           MODEL: ${{ inputs.model }}
         run: |
-          if [ "$AUTH_MODE" = "api_key" ]; then unset CLAUDE_CODE_OAUTH_TOKEN; fi
+          if [ "$AUTH_MODE" = "api_key" ]; then unset CLAUDE_CODE_OAUTH_TOKEN; else unset ANTHROPIC_API_KEY; fi
           set -f
           skill_args=()
           for s in $SKILLS; do skill_args+=(--skill "$s"); done
