@@ -1,0 +1,16 @@
+{
+  "description": "feature branch replaces a test of a removed helper and deletes the helper: --base main reports one test removed, one added, and the deleted source file",
+  "script": "scan_tests.py",
+  "args": ["diff", "--base", "main", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 0,
+  "setup": [
+    ["git", "init", "-q", "-b", "main"],
+    ["git", "add", "-A"],
+    ["git", "commit", "-q", "-m", "base: math with old helper"],
+    ["git", "checkout", "-q", "-b", "feature"],
+    {"copy": "patches/math.test.js", "to": "src/math.test.js"},
+    ["git", "rm", "-q", "src/oldRound.js"],
+    ["git", "commit", "-q", "-a", "-m", "feature: drop old helper"]
+  ]
+}

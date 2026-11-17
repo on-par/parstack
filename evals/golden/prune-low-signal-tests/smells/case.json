@@ -1,0 +1,7 @@
+{
+  "description": "TS, Python and Go tests with one line per hint kind, including a security negative that is flagged but should be kept; the clean file is scanned and not listed",
+  "script": "scan_tests.py",
+  "args": ["smells", ".", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

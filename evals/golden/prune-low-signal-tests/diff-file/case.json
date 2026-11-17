@@ -1,0 +1,7 @@
+{
+  "description": "saved git diff: one test edited in place (not counted), one replaced, a test file deleted with its source, a Python test file added, a Go test file renamed with a new test",
+  "script": "scan_tests.py",
+  "args": ["diff", "--diff-file", "changes.diff", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

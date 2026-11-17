@@ -1,0 +1,7 @@
+{
+  "description": "--diff-file points at a file that does not exist: input error with a JSON message, exit 2, never an empty 'nothing changed' report",
+  "script": "scan_tests.py",
+  "args": ["diff", "--diff-file", "missing.diff", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 2
+}
