@@ -1,0 +1,85 @@
+{
+  "areas": [
+    {
+      "area": ".",
+      "file_count": 1,
+      "files": [
+        {
+          "path": "test_smoke.py",
+          "tests": 1
+        }
+      ],
+      "tests": 1,
+      "uncounted_files": 0
+    },
+    {
+      "area": "cmd/cli",
+      "file_count": 1,
+      "files": [
+        {
+          "path": "cmd/cli/main_test.go",
+          "tests": 2
+        }
+      ],
+      "tests": 2,
+      "uncounted_files": 0
+    },
+    {
+      "area": "packages/api",
+      "file_count": 2,
+      "files": [
+        {
+          "path": "packages/api/src/__tests__/totals.ts",
+          "tests": 2
+        },
+        {
+          "path": "packages/api/src/orders.test.ts",
+          "tests": 3
+        }
+      ],
+      "tests": 5,
+      "uncounted_files": 0
+    },
+    {
+      "area": "packages/web",
+      "file_count": 1,
+      "files": [
+        {
+          "path": "packages/web/components/Button.spec.tsx",
+          "tests": 2
+        }
+      ],
+      "tests": 2,
+      "uncounted_files": 0
+    },
+    {
+      "area": "services/worker",
+      "file_count": 1,
+      "files": [
+        {
+          "path": "services/worker/tests/test_jobs.py",
+          "tests": 2
+        }
+      ],
+      "tests": 2,
+      "uncounted_files": 0
+    },
+    {
+      "area": "src/App.Tests",
+      "file_count": 1,
+      "files": [
+        {
+          "path": "src/App.Tests/WidgetTests.cs",
+          "tests": null
+        }
+      ],
+      "tests": 0,
+      "uncounted_files": 1
+    }
+  ],
+  "depth": 2,
+  "mode": "list",
+  "root": ".",
+  "total_files": 7,
+  "total_tests": 12
+}

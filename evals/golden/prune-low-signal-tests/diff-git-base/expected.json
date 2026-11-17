@@ -1,0 +1,36 @@
+{
+  "mode": "diff",
+  "moved_or_deleted_source_files": [
+    {
+      "new_path": null,
+      "path": "src/oldRound.js",
+      "status": "deleted"
+    }
+  ],
+  "source": "git:main...HEAD",
+  "test_files": [
+    {
+      "path": "src/math.test.js",
+      "status": "modified",
+      "tests_added": [
+        {
+          "kind": "test",
+          "line": 7,
+          "name": "adds negative numbers"
+        }
+      ],
+      "tests_removed": [
+        {
+          "kind": "test",
+          "line": 8,
+          "name": "oldRound still rounds down"
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "test_files": 1,
+    "tests_added": 1,
+    "tests_removed": 1
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "description": "mixed JS/TS, Python, Go and C# tests grouped by the first two dir segments; vendor/ is skipped and the C# file is listed with a null test count",
+  "script": "scan_tests.py",
+  "args": ["list", ".", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

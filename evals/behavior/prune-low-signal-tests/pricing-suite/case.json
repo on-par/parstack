@@ -1,0 +1,7 @@
+{
+  "prompt": "The tests in pricing/ have piled up and a few of them feel like they don't protect anything. Go through that folder and tell me which tests we could remove or should rewrite, and why. Don't change any files yet.",
+  "expect_skill": "prune-low-signal-tests",
+  "expect_scripts": ["scan_tests.py"],
+  "rubric": "The answer flags the test that checks legacy_coupons.py is gone and the test that compares total() with itself as removal candidates, names the two tests that check the same discounted total as duplicates, says the test that the card number never appears in the receipt is kept on purpose, and does not claim to have edited or deleted any file.",
+  "max_turns": 15
+}

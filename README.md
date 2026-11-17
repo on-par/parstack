@@ -1,6 +1,6 @@
 # parstack
 
-Nine agent skills for getting a codebase ready for agent work, managing work going in, and keeping runs healthy. Works with any repo, any agent loop, or a human team. Scripts do the deterministic work; the agent keeps the judgment.
+Ten agent skills for getting a codebase ready for agent work, managing work going in, and keeping runs healthy. Works with any repo, any agent loop, or a human team. Scripts do the deterministic work; the agent keeps the judgment.
 
 Based on On PAR's factory method.
 
@@ -12,6 +12,7 @@ Based on On PAR's factory method.
 - `add-one-verify-command` - detect the stack and write one `verify` entry point chaining build, lint, and test; prove it catches a planted break.
 - `enforce-module-boundaries` - generate cross-module import rules from the folder layout and fail only on new violations against a baseline.
 - `shrink-quality-budgets` - measure LOC, comments, duplication, dead code, and boundary violations; fail above budget, tighten to current, never raise.
+- `prune-low-signal-tests` - find tests that guard removed code, cannot fail, break on refactors, or duplicate another test, one area or PR at a time; report delete or rewrite per test and check coverage before and after any deletion.
 
 ### Manage work going in
 
@@ -52,6 +53,7 @@ Optional tools, used when present and reported as skipped when missing:
 - `shrink-quality-budgets`: jscpd, knip, dependency-cruiser
 - `check-issue-readiness`, `order-the-queue`: gh
 - `triage-failing-checks`: whatever the check command needs
+- `prune-low-signal-tests`: the repo's own test and coverage commands
 
 ## Script contract
 

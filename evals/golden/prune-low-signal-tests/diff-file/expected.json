@@ -1,0 +1,93 @@
+{
+  "mode": "diff",
+  "moved_or_deleted_source_files": [
+    {
+      "new_path": null,
+      "path": "src/legacy/legacyTotal.ts",
+      "status": "deleted"
+    }
+  ],
+  "source": "diff-file:changes.diff",
+  "test_files": [
+    {
+      "old_path": "pkg/rates/rates_test.go",
+      "path": "pkg/pricing/rates_test.go",
+      "status": "renamed",
+      "tests_added": [
+        {
+          "kind": "test",
+          "line": 12,
+          "name": "TestRoundsHalfUp"
+        }
+      ],
+      "tests_removed": []
+    },
+    {
+      "path": "services/billing/test_invoice.py",
+      "status": "added",
+      "tests_added": [
+        {
+          "kind": "suite",
+          "line": 6,
+          "name": "TestInvoice"
+        },
+        {
+          "kind": "test",
+          "line": 7,
+          "name": "test_lists_each_line"
+        },
+        {
+          "kind": "test",
+          "line": 10,
+          "name": "test_never_shows_card_number"
+        }
+      ],
+      "tests_removed": []
+    },
+    {
+      "path": "src/cart.test.ts",
+      "status": "modified",
+      "tests_added": [
+        {
+          "kind": "test",
+          "line": 9,
+          "name": "applies a percentage discount"
+        }
+      ],
+      "tests_removed": [
+        {
+          "kind": "test",
+          "line": 9,
+          "name": "exports legacyTotal"
+        }
+      ]
+    },
+    {
+      "path": "src/legacy/legacyTotal.test.ts",
+      "status": "deleted",
+      "tests_added": [],
+      "tests_removed": [
+        {
+          "kind": "suite",
+          "line": 4,
+          "name": "legacyTotal"
+        },
+        {
+          "kind": "test",
+          "line": 5,
+          "name": "matches total for one item"
+        },
+        {
+          "kind": "test",
+          "line": 8,
+          "name": "handles currency rounding"
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "test_files": 4,
+    "tests_added": 4,
+    "tests_removed": 3
+  }
+}

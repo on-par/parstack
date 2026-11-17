@@ -8,5 +8,5 @@
   "homepage": "https://github.com/on-par/parstack",
   "repository": "https://github.com/on-par/parstack",
   "license": "MIT",
-  "keywords": ["agents", "skills", "verify", "module-boundaries", "issues", "ci"]
+  "keywords": ["agents", "skills", "verify", "tests", "module-boundaries", "issues", "ci"]
 }

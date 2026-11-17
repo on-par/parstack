@@ -11,7 +11,7 @@
     {
       "name": "parstack",
       "source": "./",
-      "description": "Nine skills: assess readiness, add one verify command, enforce module boundaries, shrink quality budgets, slice work, check issue readiness, order the queue, set up work triggers, triage failing checks.",
+      "description": "Ten skills: assess readiness, add one verify command, enforce module boundaries, shrink quality budgets, prune low-signal tests, slice work, check issue readiness, order the queue, set up work triggers, triage failing checks.",
       "version": "0.1.0",
       "license": "MIT",
       "repository": "https://github.com/on-par/parstack"

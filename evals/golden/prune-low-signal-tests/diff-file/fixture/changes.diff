@@ -1,0 +1,94 @@
+diff --git a/src/cart.test.ts b/src/cart.test.ts
+index 1111111..2222222 100644
+--- a/src/cart.test.ts
++++ b/src/cart.test.ts
+@@ -1,12 +1,12 @@
+ import { describe, it, expect } from 'vitest';
+-import { total, legacyTotal } from './cart';
++import { total } from './cart';
+
+ describe('cart total', () => {
+-  it('sums line items', () => {
++  it('sums line items', async () => {
+     expect(total([{ price: 2, qty: 3 }])).toBe(6);
+   });
+
+-  it('exports legacyTotal', () => {
+-    expect(typeof legacyTotal).toBe('function');
++  it('applies a percentage discount', () => {
++    expect(total([{ price: 10, qty: 1 }], { discount: 0.1 })).toBe(9);
+   });
+ });
+diff --git a/src/cart.ts b/src/cart.ts
+index 3333333..4444444 100644
+--- a/src/cart.ts
++++ b/src/cart.ts
+@@ -1,2 +1,1 @@
+ export { total } from './total';
+-export { legacyTotal } from './legacy/legacyTotal';
+diff --git a/src/legacy/legacyTotal.test.ts b/src/legacy/legacyTotal.test.ts
+deleted file mode 100644
+index 5555555..0000000
+--- a/src/legacy/legacyTotal.test.ts
++++ /dev/null
+@@ -1,11 +0,0 @@
+-import { describe, it, expect } from 'vitest';
+-import { legacyTotal } from './legacyTotal';
+-
+-describe('legacyTotal', () => {
+-  it('matches total for one item', () => {
+-    expect(legacyTotal([{ price: 2, qty: 1 }])).toBe(2);
+-  });
+-  it.skip('handles currency rounding', () => {
+-    expect(legacyTotal([{ price: 0.1, qty: 3 }])).toBe(0.3);
+-  });
+-});
+diff --git a/src/legacy/legacyTotal.ts b/src/legacy/legacyTotal.ts
+deleted file mode 100644
+index 6666666..0000000
+--- a/src/legacy/legacyTotal.ts
++++ /dev/null
+@@ -1,3 +0,0 @@
+-export function legacyTotal(items: { price: number; qty: number }[]): number {
+-  return items.reduce((sum, i) => sum + i.price * i.qty, 0);
+-}
+diff --git a/services/billing/test_invoice.py b/services/billing/test_invoice.py
+new file mode 100644
+index 0000000..7777777
+--- /dev/null
++++ b/services/billing/test_invoice.py
+@@ -0,0 +1,11 @@
++import unittest
++
++from invoice import render
++
++
++class TestInvoice(unittest.TestCase):
++    def test_lists_each_line(self):
++        self.assertIn("2 x widget", render([("widget", 2)]))
++
++    def test_never_shows_card_number(self):
++        self.assertNotIn("4242", render([("widget", 1)], card="4242424242424242"))
+diff --git a/pkg/rates/rates_test.go b/pkg/pricing/rates_test.go
+similarity index 80%
+rename from pkg/rates/rates_test.go
+rename to pkg/pricing/rates_test.go
+index 8888888..9999999 100644
+--- a/pkg/rates/rates_test.go
++++ b/pkg/pricing/rates_test.go
+@@ -1,4 +1,4 @@
+-package rates
++package pricing
+
+ import "testing"
+
+@@ -8,3 +8,9 @@ func TestAppliesRate(t *testing.T) {
+ 		t.Fatal("rate not applied")
+ 	}
+ }
++
++func TestRoundsHalfUp(t *testing.T) {
++	if Round(2.5) != 3 {
++		t.Fatal("expected 3")
++	}
++}

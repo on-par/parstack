@@ -1,0 +1,103 @@
+{
+  "files": [
+    {
+      "hints": [
+        {
+          "kind": "skipped-or-gated",
+          "line": 16,
+          "text": "t.Skip(\"needs RATES_API\")"
+        }
+      ],
+      "path": "pkg/rates/rates_test.go"
+    },
+    {
+      "hints": [
+        {
+          "kind": "absence-assertion",
+          "line": 9,
+          "text": "self.assertFalse(os.path.exists(\"jobs/legacy_queue.py\"))"
+        },
+        {
+          "kind": "type-only-check",
+          "line": 12,
+          "text": "self.assertTrue(callable(jobs.retry))"
+        },
+        {
+          "kind": "self-comparison",
+          "line": 15,
+          "text": "self.assertEqual(jobs.backoff(3), jobs.backoff(3))"
+        },
+        {
+          "kind": "private-access",
+          "line": 25,
+          "text": "self.assertEqual(q._items, [\"a\"])"
+        },
+        {
+          "kind": "skipped-or-gated",
+          "line": 27,
+          "text": "@unittest.skipIf(os.name == \"nt\", \"posix only\")"
+        }
+      ],
+      "path": "services/worker/test_jobs.py"
+    },
+    {
+      "hints": [
+        {
+          "kind": "absence-assertion",
+          "line": 8,
+          "text": "expect(existsSync('src/beta-flag.ts')).toBe(false);"
+        },
+        {
+          "kind": "type-only-check",
+          "line": 12,
+          "text": "expect(typeof flags.isEnabled).toBe('function');"
+        },
+        {
+          "kind": "self-comparison",
+          "line": 16,
+          "text": "expect(flags.isEnabled('search')).toEqual(flags.isEnabled('search'));"
+        },
+        {
+          "kind": "call-count",
+          "line": 22,
+          "text": "expect(spy).toHaveBeenCalledTimes(1);"
+        },
+        {
+          "kind": "private-access",
+          "line": 27,
+          "text": "expect((flags as any).cache.size).toBe(1);"
+        },
+        {
+          "kind": "skipped-or-gated",
+          "line": 30,
+          "text": "it.skip('supports the old env var', () => {"
+        },
+        {
+          "kind": "copied-class-string",
+          "line": 35,
+          "text": "expect(render('banner').className).toBe('flex items-center gap-2 px-4 py-2 text-sm');"
+        },
+        {
+          "kind": "absence-assertion",
+          "line": 40,
+          "text": "expect(String(flags.lastError())).not.toContain('sk-123');"
+        }
+      ],
+      "path": "src/flags.test.ts"
+    }
+  ],
+  "files_scanned": 4,
+  "files_with_hints": 3,
+  "hint_counts": {
+    "absence-assertion": 3,
+    "call-count": 1,
+    "copied-class-string": 1,
+    "private-access": 2,
+    "self-comparison": 2,
+    "skipped-or-gated": 3,
+    "type-only-check": 2
+  },
+  "mode": "smells",
+  "note": "Hints, not verdicts: read each test before putting it in a category.",
+  "root": "."
+}
