@@ -1,0 +1,30 @@
+{
+  "modules": [],
+  "summary": {
+    "violations": [
+      {
+        "type": "dependency",
+        "from": "src/billing/invoice.ts",
+        "to": "src/users/internal/repo.ts",
+        "rule": { "severity": "error", "name": "no-cross-module-internals" }
+      },
+      {
+        "type": "cycle",
+        "from": "src/users/a.ts",
+        "to": "src/users/b.ts",
+        "rule": { "severity": "error", "name": "no-circular" },
+        "cycle": [{ "name": "src/users/b.ts" }, { "name": "src/users/a.ts" }]
+      },
+      {
+        "type": "dependency",
+        "from": "src/users/a.ts",
+        "to": "src/legacy/x.ts",
+        "rule": { "severity": "info", "name": "informational-only" }
+      }
+    ],
+    "error": 2,
+    "warn": 0,
+    "info": 1,
+    "totalCruised": 12
+  }
+}

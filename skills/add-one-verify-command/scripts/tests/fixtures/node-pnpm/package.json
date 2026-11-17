@@ -1,0 +1,13 @@
+{
+    "name": "node-pnpm",
+    "private": true,
+    "scripts": {
+        "build": "tsc -p .",
+        "lint": "eslint .",
+        "typecheck": "tsc --noEmit",
+        "test": "vitest run"
+    },
+    "devDependencies": {
+        "typescript": "^5.0.0"
+    }
+}
