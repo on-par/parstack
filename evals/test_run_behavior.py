@@ -364,7 +364,8 @@ class MainTest(unittest.TestCase):
         buf = io.StringIO()
         with redirect_stdout(buf):
             code = rb.main(argv + ["--summary-file", str(self.summary)], run=fake, which=which,
-                           env=env or {"ANTHROPIC_API_KEY": "k"}, cases_dir=self.tmp)
+                           env={"ANTHROPIC_API_KEY": "k"} if env is None else env,
+                           cases_dir=self.tmp)
         return code, buf.getvalue()
 
     def test_skip_when_claude_missing(self):
@@ -375,18 +376,46 @@ class MainTest(unittest.TestCase):
         self.assertIn("claude not found", self.summary.read_text())
         self.assertEqual(fake.claude_calls(), [])
 
-    def test_skip_when_api_key_required_and_empty(self):
+    def passing_run(self):
+        return FakeRunner(stream(
+            assistant(tool("Skill", skill="order-the-queue"),
+                      tool("Bash", command="python3 s/order_queue.py --file issues.json")),
+            result()))
+
+    def test_skip_when_auth_required_and_none_set(self):
+        for env in ({}, {"ANTHROPIC_API_KEY": "", "CLAUDE_CODE_OAUTH_TOKEN": "  "}):
+            with self.subTest(env=env):
+                fake = FakeRunner()
+                code, out = self.main(["--require-auth"], fake, env=env)
+                self.assertEqual(code, 0)
+                self.assertIn("::notice::", out)
+                self.assertIn("neither CLAUDE_CODE_OAUTH_TOKEN nor ANTHROPIC_API_KEY", out)
+                self.assertEqual(fake.claude_calls(), [])
+
+    def test_require_auth_runs_with_oauth_token(self):
+        fake = self.passing_run()
+        code, _ = self.main(["--require-auth"], fake, env={"CLAUDE_CODE_OAUTH_TOKEN": "t"})
+        self.assertEqual(code, 0)
+        self.assertEqual(len(fake.claude_calls()), 1)
+
+    def test_require_auth_runs_with_api_key(self):
+        fake = self.passing_run()
+        code, _ = self.main(["--require-auth"], fake, env={"ANTHROPIC_API_KEY": "k"})
+        self.assertEqual(code, 0)
+        self.assertEqual(len(fake.claude_calls()), 1)
+
+    def test_require_api_key_is_hidden_alias(self):
         fake = FakeRunner()
         code, out = self.main(["--require-api-key"], fake, env={"ANTHROPIC_API_KEY": ""})
         self.assertEqual(code, 0)
-        self.assertIn("ANTHROPIC_API_KEY is not set", out)
+        self.assertIn("neither CLAUDE_CODE_OAUTH_TOKEN nor ANTHROPIC_API_KEY", out)
         self.assertEqual(fake.claude_calls(), [])
+        self.assertNotIn("--require-api-key", rb.build_parser().format_help())
+        self.assertIn("--require-auth", rb.build_parser().format_help())
 
-    def test_empty_key_without_flag_still_runs(self):
-        out = stream(assistant(tool("Skill", skill="order-the-queue"),
-                               tool("Bash", command="python3 s/order_queue.py --file issues.json")), result())
-        fake = FakeRunner(out)
-        code, _ = self.main([], fake, env={"ANTHROPIC_API_KEY": ""})
+    def test_no_auth_without_flag_still_runs(self):
+        fake = self.passing_run()
+        code, _ = self.main([], fake, env={})
         self.assertEqual(code, 0)
         self.assertEqual(len(fake.claude_calls()), 1)
 

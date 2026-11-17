@@ -1,0 +1,25 @@
+name: close-outside-prs
+
+# This repo does not take outside pull requests. Close any PR whose author is
+# not on the allowlist. pull_request_target runs in the base repo context, so
+# this workflow never checks out or runs PR code and uses no secrets beyond
+# github.token. PR fields reach the shell only through env vars.
+on:
+  pull_request_target:
+    types: [opened, reopened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  close:
+    if: ${{ !contains(fromJSON('["patrob","dependabot[bot]"]'), github.event.pull_request.user.login) }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          MESSAGE: "Thanks for the interest. This repo doesn't take outside pull requests, so this one was closed automatically. Feel free to open an issue instead."
+        run: gh pr close "$PR_NUMBER" --repo "$REPO" --comment "$MESSAGE"

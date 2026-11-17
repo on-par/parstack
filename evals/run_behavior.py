@@ -50,7 +50,7 @@ import tempfile
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, Mapping
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CASES_DIR = REPO_ROOT / "evals" / "behavior"
@@ -586,13 +586,21 @@ def write_summary(path: str | None, text: str) -> None:
 
 # --- main --------------------------------------------------------------------
 
-def skip_reason(require_api_key: bool, which: Callable[[str], str | None] = shutil.which,
-                env: dict[str, str] | None = None) -> str | None:
+AUTH_VARS = ("CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_API_KEY")
+
+
+def has_auth(env: Mapping[str, str]) -> bool:
+    """True when either Claude Code credential is set and non-blank."""
+    return any(env.get(name, "").strip() for name in AUTH_VARS)
+
+
+def skip_reason(require_auth: bool, which: Callable[[str], str | None] = shutil.which,
+                env: Mapping[str, str] | None = None) -> str | None:
     env = os.environ if env is None else env
     if which("claude") is None:
         return "claude not found on PATH"
-    if require_api_key and not env.get("ANTHROPIC_API_KEY", "").strip():
-        return "ANTHROPIC_API_KEY is not set"
+    if require_auth and not has_auth(env):
+        return "neither CLAUDE_CODE_OAUTH_TOKEN nor ANTHROPIC_API_KEY is set"
     return None
 
 
@@ -612,8 +620,11 @@ def build_parser() -> argparse.ArgumentParser:
                    help="spend cap per model call, passed to claude")
     p.add_argument("--rubric-model", metavar="M", help="model for rubric grading (default: --model)")
     p.add_argument("--no-rubric", action="store_true", help="skip rubric grading")
-    p.add_argument("--require-api-key", action="store_true",
-                   help="skip (exit 0) when ANTHROPIC_API_KEY is empty")
+    p.add_argument("--require-auth", action="store_true",
+                   help="skip (exit 0) when neither CLAUDE_CODE_OAUTH_TOKEN nor "
+                        "ANTHROPIC_API_KEY is set")
+    p.add_argument("--require-api-key", dest="require_auth", action="store_true",
+                   help=argparse.SUPPRESS)
     p.add_argument("--json", action="store_true", help="print machine JSON")
     p.add_argument("--summary-file", metavar="PATH", help="append a markdown summary here")
     return p
@@ -662,7 +673,7 @@ def main(argv: list[str] | None = None, run: Runner = subprocess.run,
     if not cases:
         return finish(None, "no behavior cases selected")
 
-    reason = skip_reason(args.require_api_key, which, env)
+    reason = skip_reason(args.require_auth, which, env)
     if reason:
         return finish(None, f"skipped: {reason}", gh_notice=True)
 
