@@ -89,6 +89,8 @@ python3 -m unittest discover -s evals -p 'test_*.py'
 - `--update` never changes `expect_exit`, and it does not write a golden when the exit code is wrong. Read every changed `expected.json` before you commit it. A golden that records a bug is worse than no golden.
 - CI runs the cases for changed skills on PRs and all cases on push.
 
+To add a case: create `evals/golden/<skill>/<case>/` with `case.json` and `fixture/`, run `python3 evals/run_golden.py --skill <skill> --update`, read the new `expected.json`, and commit all three.
+
 ## Evals: behavior (opt-in)
 
 Behavior evals run a real agent session per case and check that it picks the right skill and runs its scripts. They cost model calls, so they never run by default.
@@ -105,6 +107,17 @@ python3 evals/run_behavior.py --skill order-the-queue --skill check-issue-readin
 python3 evals/run_behavior.py --changed-from origin/main --max-budget-usd 0.50 --json
 python3 -m unittest discover -s evals -p 'test_run_behavior.py'
 ```
+
+Sessions load only project settings plus this plugin, so plugins from your own user settings do not compete for the trigger.
+
+To add a case: create `evals/behavior/<skill>/<case>/case.json` (and `fixture/` if the prompt needs a repo), then run it locally with `--skill <skill>`.
+
+To run in CI:
+
+- On a PR that touches `skills/**` or the behavior evals, add the `run-evals` label. New pushes rerun it while the label stays.
+- Or start the `behavior-evals` workflow by hand from the Actions tab, with optional skills and model inputs.
+- Both need a repo secret named `ANTHROPIC_API_KEY`. Results go to the job summary.
+- Cost is bounded: 1 case per skill, a 300 s timeout and a $0.50 cap per case.
 
 The default model is `$PARSTACK_EVAL_MODEL` or `haiku`. Without `claude` on PATH the runner prints a notice and exits 0. In CI the `behavior-evals` workflow runs on PRs labeled `run-evals` (changed skills only) or by hand, and skips when no API key secret is set.
 
