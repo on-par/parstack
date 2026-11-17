@@ -315,8 +315,11 @@ def check_secrets(root: Path, files: list[str], env: Env) -> dict:
                 if proc.returncode == 0 and not findings:
                     return check("secrets", "pass", "gitleaks: no leaks")
                 n = len(findings) if findings else "some"
-                return check("secrets", "fail", f"gitleaks: {n} finding(s)",
-                             "Rotate the leaked secrets, remove them from history, add gitleaks to CI.")
+                files_hit = sorted({f.get("File", "?") for f in findings if isinstance(f, dict)})
+                where = (": " + ", ".join(files_hit[:5])) if files_hit else ""
+                return check("secrets", "fail", f"gitleaks: {n} finding(s) in git history{where}",
+                             "Review each finding: rotate and purge real secrets, allowlist test fixtures "
+                             "in .gitleaks.toml, then add gitleaks to CI.")
             if proc is not None:
                 err = (proc.stderr or "").strip()[:200]
             # fall through to regex scan
