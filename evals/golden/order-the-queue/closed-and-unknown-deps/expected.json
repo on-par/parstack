@@ -1,0 +1,50 @@
+{
+  "blocked": [
+    {
+      "number": 20,
+      "reasons": [
+        "depends on unknown #99"
+      ],
+      "title": "Billing hook"
+    },
+    {
+      "number": 21,
+      "reasons": [
+        "depends on blocked #20"
+      ],
+      "title": "Invoice email"
+    }
+  ],
+  "counts": {
+    "blocked": 2,
+    "groups": 1,
+    "open": 3,
+    "runnable": 1
+  },
+  "cycles": [],
+  "layers": [
+    [
+      {
+        "number": 22,
+        "title": "Uses finished work"
+      }
+    ]
+  ],
+  "missing": [
+    {
+      "dependency": "#99",
+      "issue": 20,
+      "status": "unknown"
+    },
+    {
+      "dependency": "#50",
+      "issue": 22,
+      "status": "closed"
+    }
+  ],
+  "order": [
+    22
+  ],
+  "stale": [],
+  "stale_days": 30
+}

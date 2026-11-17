@@ -1,0 +1,52 @@
+{
+  "blocked": [
+    {
+      "number": 11,
+      "reasons": [
+        "in dependency cycle #11 -> #12 -> #13 -> #11"
+      ],
+      "title": "Refund flow"
+    },
+    {
+      "number": 12,
+      "reasons": [
+        "in dependency cycle #11 -> #12 -> #13 -> #11"
+      ],
+      "title": "Refund emails"
+    },
+    {
+      "number": 13,
+      "reasons": [
+        "in dependency cycle #11 -> #12 -> #13 -> #11"
+      ],
+      "title": "Refund ledger"
+    }
+  ],
+  "counts": {
+    "blocked": 3,
+    "groups": 1,
+    "open": 4,
+    "runnable": 1
+  },
+  "cycles": [
+    [
+      11,
+      12,
+      13
+    ]
+  ],
+  "layers": [
+    [
+      {
+        "number": 10,
+        "title": "Payments client"
+      }
+    ]
+  ],
+  "missing": [],
+  "order": [
+    10
+  ],
+  "stale": [],
+  "stale_days": 30
+}

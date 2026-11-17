@@ -1,0 +1,52 @@
+{
+  "action": "would-write",
+  "content": "pnpm run lint && pnpm run typecheck && pnpm run build && pnpm run test",
+  "detected_stacks": [
+    "node"
+  ],
+  "existing": null,
+  "root": "<TMP>",
+  "stacks": [
+    "node"
+  ],
+  "steps": [
+    {
+      "argv": [
+        "pnpm",
+        "run",
+        "lint"
+      ],
+      "cmd": "pnpm run lint",
+      "name": "lint"
+    },
+    {
+      "argv": [
+        "pnpm",
+        "run",
+        "typecheck"
+      ],
+      "cmd": "pnpm run typecheck",
+      "name": "typecheck"
+    },
+    {
+      "argv": [
+        "pnpm",
+        "run",
+        "build"
+      ],
+      "cmd": "pnpm run build",
+      "name": "build"
+    },
+    {
+      "argv": [
+        "pnpm",
+        "run",
+        "test"
+      ],
+      "cmd": "pnpm run test",
+      "name": "test"
+    }
+  ],
+  "target": "package.json",
+  "verify_command": "pnpm run verify"
+}

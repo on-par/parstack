@@ -1,0 +1,47 @@
+{
+  "assumptions": [],
+  "detected": {
+    "criteria": [
+      {
+        "proof": "test_expired_token_rejected",
+        "text": "A 61-minute-old token is rejected with \"link expired\""
+      },
+      {
+        "proof": "`npm test -- reset`",
+        "text": "A 59-minute-old token still works for a reset"
+      }
+    ],
+    "criteria_source": "section",
+    "dependencies": [
+      "#41"
+    ],
+    "dependencies_none": false,
+    "has_out_of_scope_section": true,
+    "has_scope_section": true,
+    "headings": [
+      "Context",
+      "Scope",
+      "Out of scope",
+      "Acceptance criteria",
+      "Dependencies"
+    ],
+    "open_questions": [],
+    "out_of_scope": [
+      "Changing the email template"
+    ],
+    "proof_section_items": [],
+    "scope": [
+      "Store issued-at on the reset token",
+      "Reject tokens older than 60 minutes"
+    ],
+    "unresolved": []
+  },
+  "labels": [],
+  "missing": [],
+  "notes": [
+    "confirm these are merged before starting: #41"
+  ],
+  "source": "markdown",
+  "title": "Expire password reset links after one hour",
+  "verdict": "ready"
+}

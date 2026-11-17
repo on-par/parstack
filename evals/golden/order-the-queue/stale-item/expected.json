@@ -1,0 +1,42 @@
+{
+  "blocked": [
+    {
+      "number": 32,
+      "reasons": [
+        "label \"blocked\""
+      ],
+      "title": "Waiting on vendor answer"
+    }
+  ],
+  "counts": {
+    "blocked": 1,
+    "groups": 1,
+    "open": 3,
+    "runnable": 2
+  },
+  "cycles": [],
+  "layers": [
+    [
+      {
+        "number": 30,
+        "title": "Report export"
+      },
+      {
+        "number": 31,
+        "title": "Report filters"
+      }
+    ]
+  ],
+  "missing": [],
+  "order": [
+    30,
+    31
+  ],
+  "stale": [
+    {
+      "days": 108,
+      "issue": 30
+    }
+  ],
+  "stale_days": 30
+}

@@ -1,0 +1,11 @@
+{
+  "include": ["src/**"],
+  "exclude": ["**/*.test.ts"],
+  "budgets": {"loc": 20, "comment_lines": 10, "duplication": 5.0, "dead_code": 10, "boundary_violations": 3},
+  "sources": {
+    "jscpd_report": "reports/jscpd.json",
+    "knip_report": "reports/knip.json",
+    "depcruise_report": "",
+    "boundaries_baseline": "boundaries-baseline.json"
+  }
+}

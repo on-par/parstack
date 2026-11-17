@@ -1,0 +1,11 @@
+{
+  "action": "nothing",
+  "content": null,
+  "detected_stacks": [],
+  "existing": null,
+  "reason": "no supported stack detected",
+  "root": "<TMP>",
+  "stacks": [],
+  "steps": [],
+  "target": null
+}

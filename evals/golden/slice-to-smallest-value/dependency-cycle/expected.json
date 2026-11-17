@@ -1,0 +1,27 @@
+{
+  "cycles": [
+    [
+      "S2",
+      "S3"
+    ]
+  ],
+  "errors": [
+    {
+      "code": "cycle",
+      "message": "dependency cycle: S2 -> S3 -> S2",
+      "slice": null
+    }
+  ],
+  "layers": [
+    [
+      "S1"
+    ]
+  ],
+  "ok": false,
+  "order": [
+    "S1"
+  ],
+  "overlaps": [],
+  "slice_count": 3,
+  "warnings": []
+}

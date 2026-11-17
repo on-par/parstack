@@ -1,0 +1,20 @@
+{
+  "baseline": "boundaries-baseline.json",
+  "baseline_count": 0,
+  "baseline_found": false,
+  "current_count": 0,
+  "fixed": [],
+  "new": [],
+  "reason": "no new violations",
+  "stack": "ts",
+  "status": "pass",
+  "unresolved_aliases": [
+    {
+      "from": "src/billing/invoice.ts",
+      "module": "@/x"
+    }
+  ],
+  "warnings": [
+    "1 unresolved import(s) look like path aliases ('@/x' in src/billing/invoice.ts); dependency-cruiser is not resolving them, so violations through aliases are missed. Check that options.tsConfig in .dependency-cruiser.cjs points at the tsconfig that defines compilerOptions.paths."
+  ]
+}

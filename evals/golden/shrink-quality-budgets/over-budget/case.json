@@ -1,0 +1,7 @@
+{
+  "description": "LOC (11 > 10) and duplication (4.2 > 3.0) over budget: fail on exactly those two",
+  "script": "budgets.py",
+  "args": ["check", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 1
+}

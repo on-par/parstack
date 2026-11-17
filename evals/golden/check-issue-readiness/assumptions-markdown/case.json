@@ -1,0 +1,7 @@
+{
+  "description": "markdown issue with criteria but no scope, no dependencies, and one criterion without proof: ready-with-assumptions",
+  "script": "check_issue.py",
+  "args": ["--file", "issue.md", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

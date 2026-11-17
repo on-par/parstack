@@ -1,0 +1,7 @@
+{
+  "description": "Linear-style JSON export (title/description) with criteria, proof, scope, and dependencies: ready",
+  "script": "check_issue.py",
+  "args": ["--json-file", "issue.json", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

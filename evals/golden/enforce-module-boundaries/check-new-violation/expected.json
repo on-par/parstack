@@ -1,0 +1,18 @@
+{
+  "baseline": "boundaries-baseline.json",
+  "baseline_count": 1,
+  "baseline_found": true,
+  "current_count": 2,
+  "fixed": [],
+  "new": [
+    {
+      "from": "src/orders/checkout.ts",
+      "rule": "no-cross-module-internals",
+      "to": "src/billing/internal/rates.ts"
+    }
+  ],
+  "reason": "1 new violation(s) not in the baseline",
+  "stack": "ts",
+  "status": "fail",
+  "warnings": []
+}

@@ -1,0 +1,7 @@
+{
+  "description": "clean slices: every criterion covered, concrete proofs, no cycles, overlap only along a dependency",
+  "script": "check_slices.py",
+  "args": ["slices.json", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

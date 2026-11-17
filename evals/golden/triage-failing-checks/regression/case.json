@@ -1,0 +1,15 @@
+{
+  "description": "add() works on main and breaks on the feature branch: the check is a regression, exit 1",
+  "script": "triage_checks.py",
+  "args": ["--cmd", "python3 check.py", "--base", "main", "--no-state", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 1,
+  "setup": [
+    ["git", "init", "-q", "-b", "main"],
+    ["git", "add", "-A"],
+    ["git", "commit", "-q", "-m", "base: add works"],
+    ["git", "checkout", "-q", "-b", "feature"],
+    {"copy": "patches/calc_broken.py", "to": "calc.py"},
+    ["git", "commit", "-q", "-a", "-m", "feature: break add"]
+  ]
+}

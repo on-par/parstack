@@ -1,0 +1,7 @@
+{
+  "description": "#11 -> #12 -> #13 -> #11 is a cycle; #10 still runs",
+  "script": "order_queue.py",
+  "args": ["--file", "issues.json", "--now", "2026-11-17T00:00:00Z", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 1
+}

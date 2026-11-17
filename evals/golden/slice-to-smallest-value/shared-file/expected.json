@@ -1,0 +1,34 @@
+{
+  "cycles": [],
+  "errors": [
+    {
+      "code": "file-overlap",
+      "message": "S1 and S2 are independent but both touch src/orders/query.ts; add a dependency to serialize them or merge them",
+      "slice": "S1"
+    }
+  ],
+  "layers": [
+    [
+      "S1",
+      "S2"
+    ]
+  ],
+  "ok": false,
+  "order": [
+    "S1",
+    "S2"
+  ],
+  "overlaps": [
+    {
+      "files": [
+        "src/orders/query.ts"
+      ],
+      "slices": [
+        "S1",
+        "S2"
+      ]
+    }
+  ],
+  "slice_count": 2,
+  "warnings": []
+}

@@ -1,0 +1,7 @@
+{
+  "description": "same triggers, default human output: the YAML itself, goldened as text",
+  "script": "make_trigger_workflow.py",
+  "args": ["--label", "agent-run", "--command", "/run", "--cron", "0 6 * * 1", "--run-command", "make agent-run"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

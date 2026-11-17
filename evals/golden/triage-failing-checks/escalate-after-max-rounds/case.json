@@ -1,0 +1,16 @@
+{
+  "description": "3 rework rounds already spent on this branch and check: refuse a 4th and escalate, exit 1",
+  "script": "triage_checks.py",
+  "args": ["--cmd", "python3 check.py", "--base", "main", "--state", ".triage-rounds.json", "--max-rounds", "3", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 1,
+  "setup": [
+    ["git", "init", "-q", "-b", "main"],
+    ["git", "add", "-A"],
+    ["git", "commit", "-q", "-m", "base: add works"],
+    ["git", "checkout", "-q", "-b", "feature"],
+    {"copy": "patches/calc_broken.py", "to": "calc.py"},
+    ["git", "commit", "-q", "-a", "-m", "feature: break add"],
+    {"copy": "patches/triage-rounds.json", "to": ".triage-rounds.json"}
+  ]
+}

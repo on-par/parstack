@@ -1,0 +1,7 @@
+{
+  "description": "the only error-level violation is already in the baseline; the info-level one is ignored: pass",
+  "script": "check_boundaries.py",
+  "args": [".", "--depcruise-json", "depcruise.json", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

@@ -40,3 +40,27 @@ jobs:
           else
             echo "skipped: no skill tests yet"
           fi
+
+      - name: Golden eval runner tests
+        run: python3 -m unittest discover -s evals -p 'test_*.py' -v
+
+  golden-evals:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Golden evals (skills changed in this PR)
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: python3 evals/run_golden.py --changed-from "origin/$BASE_REF"
+
+      - name: Golden evals (all)
+        if: github.event_name != 'pull_request'
+        run: python3 evals/run_golden.py

@@ -1,0 +1,7 @@
+{
+  "description": "markdown list input: inline and next-line dependencies, a closed [x] item, a depends-on label",
+  "script": "order_queue.py",
+  "args": ["--file", "queue.md", "--now", "2026-11-17T00:00:00Z", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

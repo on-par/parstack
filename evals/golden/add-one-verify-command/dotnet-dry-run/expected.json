@@ -1,0 +1,47 @@
+{
+  "action": "would-write",
+  "content": "#!/usr/bin/env bash\n# Single verify entry point: build, lint, test. Stops at the first failure.\nset -euo pipefail\ncd \"$(dirname \"$0\")/..\"\n\nstep() { echo \"==> $*\"; \"$@\"; }\n\nstep dotnet format App.sln --verify-no-changes\nstep dotnet build App.sln --nologo\nstep dotnet test App.sln --nologo --no-build\n\necho \"verify: ok\"\n",
+  "detected_stacks": [
+    "dotnet"
+  ],
+  "existing": null,
+  "root": "<TMP>",
+  "stacks": [
+    "dotnet"
+  ],
+  "steps": [
+    {
+      "argv": [
+        "dotnet",
+        "format",
+        "App.sln",
+        "--verify-no-changes"
+      ],
+      "cmd": "dotnet format App.sln --verify-no-changes",
+      "name": "lint"
+    },
+    {
+      "argv": [
+        "dotnet",
+        "build",
+        "App.sln",
+        "--nologo"
+      ],
+      "cmd": "dotnet build App.sln --nologo",
+      "name": "build"
+    },
+    {
+      "argv": [
+        "dotnet",
+        "test",
+        "App.sln",
+        "--nologo",
+        "--no-build"
+      ],
+      "cmd": "dotnet test App.sln --nologo --no-build",
+      "name": "test"
+    }
+  ],
+  "target": "scripts/verify.sh",
+  "verify_command": "bash scripts/verify.sh"
+}

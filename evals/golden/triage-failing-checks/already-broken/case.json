@@ -1,0 +1,16 @@
+{
+  "description": "add() is already broken on main; the feature branch only adds docs: already-broken, non-blocking, exit 0",
+  "script": "triage_checks.py",
+  "args": ["--cmd", "python3 check.py", "--base", "main", "--no-state", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 0,
+  "setup": [
+    ["git", "init", "-q", "-b", "main"],
+    ["git", "add", "-A"],
+    ["git", "commit", "-q", "-m", "base: add already broken"],
+    ["git", "checkout", "-q", "-b", "feature"],
+    {"copy": "patches/NOTES.md", "to": "NOTES.md"},
+    ["git", "add", "NOTES.md"],
+    ["git", "commit", "-q", "-m", "feature: docs"]
+  ]
+}

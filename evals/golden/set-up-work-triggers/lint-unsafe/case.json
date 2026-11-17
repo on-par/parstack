@@ -1,0 +1,7 @@
+{
+  "description": "lint a hand-written workflow that puts an expression and an untrusted issue title into run:",
+  "script": "make_trigger_workflow.py",
+  "args": ["--lint", "agent-run.yml", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 1
+}

@@ -1,0 +1,7 @@
+{
+  "description": "repo with no supported stack: nothing to chain, exit 1",
+  "script": "make_verify.py",
+  "args": [".", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 1
+}

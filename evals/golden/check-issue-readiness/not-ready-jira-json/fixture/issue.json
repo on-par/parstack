@@ -1,0 +1,17 @@
+{
+  "key": "OPS-31",
+  "fields": {
+    "summary": "Speed up the nightly report",
+    "labels": ["performance"],
+    "description": {
+      "type": "doc",
+      "content": [
+        {"type": "paragraph", "content": [{"type": "text", "text": "The nightly report is slow. Make it faster and more robust. Details TBD."}]},
+        {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "Open questions"}]},
+        {"type": "bulletList", "content": [
+          {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Which report sections can be cached?"}]}]}
+        ]}
+      ]
+    }
+  }
+}

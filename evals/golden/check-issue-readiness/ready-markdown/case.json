@@ -1,0 +1,7 @@
+{
+  "description": "markdown issue with scope, out of scope, criteria with proofs, and a dependency: ready",
+  "script": "check_issue.py",
+  "args": ["--file", "issue.md", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

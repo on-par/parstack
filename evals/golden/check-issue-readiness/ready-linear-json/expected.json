@@ -1,0 +1,39 @@
+{
+  "assumptions": [],
+  "detected": {
+    "criteria": [
+      {
+        "proof": "OrdersExportTests.DownloadsVisibleRows",
+        "text": "Export button downloads visible rows (proof: OrdersExportTests.DownloadsVisibleRows)"
+      }
+    ],
+    "criteria_source": "section",
+    "dependencies": [],
+    "dependencies_none": true,
+    "has_out_of_scope_section": true,
+    "has_scope_section": true,
+    "headings": [
+      "Acceptance criteria",
+      "Scope",
+      "Out of scope",
+      "Dependencies"
+    ],
+    "open_questions": [],
+    "out_of_scope": [
+      "XLSX"
+    ],
+    "proof_section_items": [],
+    "scope": [
+      "Button and endpoint"
+    ],
+    "unresolved": []
+  },
+  "labels": [
+    "feature"
+  ],
+  "missing": [],
+  "notes": [],
+  "source": "json",
+  "title": "Export orders as CSV",
+  "verdict": "ready"
+}

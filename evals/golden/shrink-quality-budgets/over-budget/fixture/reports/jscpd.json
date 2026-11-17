@@ -1,0 +1,6 @@
+{
+  "statistics": {
+    "total": { "lines": 1000, "sources": 20, "clones": 3, "duplicatedLines": 42, "percentage": 4.2 }
+  },
+  "duplicates": []
+}

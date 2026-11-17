@@ -1,0 +1,23 @@
+{
+  "modules": [],
+  "summary": {
+    "violations": [
+      {
+        "type": "dependency",
+        "from": "src/billing/invoice.ts",
+        "to": "src/users/internal/repo.ts",
+        "rule": {"severity": "error", "name": "no-cross-module-internals"}
+      },
+      {
+        "type": "dependency",
+        "from": "src/orders/checkout.ts",
+        "to": "src/billing/internal/rates.ts",
+        "rule": {"severity": "error", "name": "no-cross-module-internals"}
+      }
+    ],
+    "error": 2,
+    "warn": 0,
+    "info": 0,
+    "totalCruised": 9
+  }
+}
