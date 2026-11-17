@@ -1,0 +1,42 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Configure git for tests
+        run: |
+          git config --global user.name "ci"
+          git config --global user.email "ci@example.invalid"
+          git config --global init.defaultBranch main
+
+      - name: Validate repo
+        run: python3 tools/validate.py
+
+      - name: Validator tests
+        run: python3 -m unittest discover -s tools -p 'test_*.py' -v
+
+      - name: Skill tests
+        run: |
+          if ls skills/*/scripts/tests/test_*.py >/dev/null 2>&1; then
+            python3 -m unittest discover -s skills -p 'test_*.py' -v
+          else
+            echo "skipped: no skill tests yet"
+          fi

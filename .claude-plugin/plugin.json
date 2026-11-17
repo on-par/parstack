@@ -1,0 +1,12 @@
+{
+  "name": "parstack",
+  "version": "0.1.0",
+  "description": "Agent skills for getting codebases ready for agent work, managing work going in, and keeping runs healthy. Scripts do the deterministic work; the agent keeps the judgment.",
+  "author": {
+    "name": "On PAR"
+  },
+  "homepage": "https://github.com/on-par/parstack",
+  "repository": "https://github.com/on-par/parstack",
+  "license": "MIT",
+  "keywords": ["agents", "skills", "verify", "module-boundaries", "issues", "ci"]
+}
