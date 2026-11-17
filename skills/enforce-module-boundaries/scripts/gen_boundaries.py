@@ -19,6 +19,7 @@ from pathlib import Path
 DEFAULT_EXCLUDES = ["node_modules", "__tests__", "__mocks__", "test", "tests", "testing", "types",
                     "typings", "assets", "styles", "bin", "obj", "Properties"]
 INDEX_RE = r"index\.(ts|tsx|js|jsx|mjs|cjs)$"
+RESOLVE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"]
 TEST_CLASS = "ModuleBoundariesTests"
 TEST_FRAMEWORK_RE = re.compile(r"(?i)Microsoft\.NET\.Test\.Sdk|xunit")
 
@@ -49,7 +50,21 @@ def find_modules(repo: Path, root: str, glob: str, excludes: list[str]) -> list[
 
 # ---------------------------------------------------------------- TypeScript
 
-def render_depcruise(modules: list[str], has_tsconfig: bool) -> str:
+def find_tsconfig(repo: Path, root: str) -> str | None:
+    """Closest tsconfig.json from --root up to the repo root, repo-relative; None if none."""
+    top = repo.resolve()
+    current = (top / root).resolve()
+    if current != top and top not in current.parents:
+        current = top
+    while True:
+        if (current / "tsconfig.json").is_file():
+            return (current / "tsconfig.json").relative_to(top).as_posix()
+        if current == top:
+            return None
+        current = current.parent
+
+
+def render_depcruise(modules: list[str], tsconfig: str | None) -> str:
     alt = "(" + "|".join(js_regex_escape(m) for m in modules) + ")"
     q = json.dumps
     lines = [
@@ -82,8 +97,11 @@ def render_depcruise(modules: list[str], has_tsconfig: bool) -> str:
         '    doNotFollow: { path: "node_modules" },',
         "    tsPreCompilationDeps: true,",
     ]
-    if has_tsconfig:
-        lines.append('    tsConfig: { fileName: "tsconfig.json" },')
+    if tsconfig:
+        lines.append("    // Path aliases (compilerOptions.paths) resolve through this tsconfig.")
+        lines.append(f"    tsConfig: {{ fileName: {q(tsconfig)} }},")
+    exts = ", ".join(q(e) for e in RESOLVE_EXTENSIONS)
+    lines.append(f"    enhancedResolveOptions: {{ extensions: [{exts}] }},")
     lines += ["  },", "};", ""]
     return "\n".join(lines)
 
@@ -199,7 +217,8 @@ def generate(repo: Path, stack: str, root: str, glob: str, explicit: list[str] |
     result = {"stack": stack, "root": root, "modules": modules}
     if stack == "ts":
         result["target"] = out or ".dependency-cruiser.cjs"
-        result["content"] = render_depcruise(modules, (repo / "tsconfig.json").exists()) if len(modules) >= 2 else None
+        result["tsconfig"] = find_tsconfig(repo, root)
+        result["content"] = render_depcruise(modules, result["tsconfig"]) if len(modules) >= 2 else None
     else:
         namespaces = module_namespaces(repo, root, modules, prefix)
         result["namespaces"] = namespaces
@@ -260,6 +279,8 @@ def main(argv: list[str] | None = None) -> int:
     else:
         print(f"stack: {stack}  root: {root}")
         print("modules: " + (", ".join(result["modules"]) or "(none)"))
+        if stack == "ts":
+            print("tsconfig: " + (result["tsconfig"] or "none found (path aliases will not resolve)"))
         if result.get("namespaces"):
             print("namespaces: " + ", ".join(result["namespaces"]))
         if result["action"] in ("nothing", "exists"):

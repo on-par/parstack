@@ -77,7 +77,8 @@ def depcruise_command(repo: Path, env: Env) -> tuple[list[str], bool] | None:
     return None
 
 
-def run_depcruise(repo: Path, config: str, sources: list[str], timeout: float, env: Env) -> list[dict] | None:
+def run_depcruise(repo: Path, config: str, sources: list[str], timeout: float, env: Env) -> dict | None:
+    """The raw JSON report, or None when dependency-cruiser is not available."""
     cmd = depcruise_command(repo, env)
     if cmd is None:
         return None
@@ -91,7 +92,109 @@ def run_depcruise(repo: Path, config: str, sources: list[str], timeout: float, e
             return None  # npx could not find dependency-cruiser: treat as not installed
         raise ToolError(f"dependency-cruiser produced no JSON (exit {proc.returncode}): "
                         f"{(proc.stderr or '').strip()[-400:]}")
-    return parse_depcruise(data)
+    return data
+
+
+# ---------------------------------------------------------------- unresolved path aliases
+
+ALIAS_PREFIXES = ("@/", "~/")
+TSCONFIG_RE = re.compile(r"""tsConfig\s*:\s*\{[^}]*?fileName\s*:\s*["']([^"']+)["']""")
+
+
+def strip_jsonc(text: str) -> str:
+    """Drop // and /* */ comments and trailing commas outside strings (tsconfig is JSONC)."""
+    out, i, n, in_str = [], 0, len(text), False
+    while i < n:
+        c = text[i]
+        if in_str:
+            out.append(c)
+            if c == "\\" and i + 1 < n:
+                out.append(text[i + 1])
+                i += 1
+            elif c == '"':
+                in_str = False
+        elif c == '"':
+            in_str = True
+            out.append(c)
+        elif text.startswith("//", i):
+            while i < n and text[i] != "\n":
+                i += 1
+            continue
+        elif text.startswith("/*", i):
+            end = text.find("*/", i + 2)
+            i = n if end < 0 else end + 2
+            continue
+        else:
+            out.append(c)
+        i += 1
+    return re.sub(r",(\s*[}\]])", r"\1", "".join(out))
+
+
+def tsconfig_paths(path: Path, depth: int = 0) -> dict:
+    """compilerOptions.paths from a tsconfig, following relative `extends` (closest wins)."""
+    try:
+        data = json.loads(strip_jsonc(path.read_text(encoding="utf-8")))
+    except (OSError, ValueError):
+        return {}
+    if not isinstance(data, dict):
+        return {}
+    paths = {}
+    parents = data.get("extends")
+    parents = [parents] if isinstance(parents, str) else parents if isinstance(parents, list) else []
+    if depth < 5:
+        for parent in parents:
+            if isinstance(parent, str) and parent.startswith("."):
+                target = (path.parent / parent).resolve()
+                if target.suffix != ".json":
+                    target = target.with_name(target.name + ".json")
+                paths.update(tsconfig_paths(target, depth + 1))
+    own = (data.get("compilerOptions") or {}).get("paths") if isinstance(data.get("compilerOptions"), dict) else None
+    if isinstance(own, dict):
+        paths.update(own)
+    return paths
+
+
+def alias_matchers(repo: Path, config: str | None) -> tuple[tuple[str, ...], set[str]]:
+    """(prefixes, exact names) that look like path aliases: @/ and ~/ plus tsconfig paths keys."""
+    tsconfig = "tsconfig.json"
+    if config:
+        try:
+            match = TSCONFIG_RE.search((repo / config).read_text(encoding="utf-8", errors="replace"))
+        except OSError:
+            match = None
+        if match:
+            tsconfig = match.group(1)
+    prefixes, exact = set(ALIAS_PREFIXES), set()
+    for name in tsconfig_paths(repo / tsconfig):
+        if "*" in name:
+            prefix = name.split("*", 1)[0]
+            if prefix:  # a bare "*" key would match every package name
+                prefixes.add(prefix)
+        else:
+            exact.add(name)
+    return tuple(sorted(prefixes)), exact
+
+
+def unresolved_aliases(data: dict, prefixes: tuple[str, ...], exact: set[str]) -> list[dict]:
+    out = set()
+    for mod in data.get("modules") or []:
+        if not isinstance(mod, dict):
+            continue
+        for dep in mod.get("dependencies") or []:
+            if not isinstance(dep, dict) or not dep.get("couldNotResolve"):
+                continue
+            name = str(dep.get("module", ""))
+            if name.startswith(prefixes) or name in exact:
+                out.add((str(mod.get("source", "")), name))
+    return [{"from": f, "module": m} for f, m in sorted(out)]
+
+
+def alias_warning(found: list[dict], config: str | None) -> str:
+    sample = ", ".join(f"'{d['module']}' in {d['from']}" for d in found[:3])
+    where = f"options.tsConfig in {config}" if config else "options.tsConfig in the dependency-cruiser config"
+    return (f"{len(found)} unresolved import(s) look like path aliases ({sample}); dependency-cruiser is not "
+            f"resolving them, so violations through aliases are missed. Check that {where} points at the "
+            f"tsconfig that defines compilerOptions.paths.")
 
 
 # ---------------------------------------------------------------- .NET
@@ -165,23 +268,30 @@ def check(repo: Path, args, env: Env) -> dict:
     if not stack:
         raise ValueError("cannot detect stack; pass --stack")
     result = {"stack": stack, "baseline": args.baseline}
+    warnings = []
 
     if stack == "ts":
         tool = "dependency-cruiser"
+        config = args.config or next((c for c in DEPCRUISE_CONFIGS if (repo / c).exists()), None)
         if args.depcruise_json:
             try:
-                current = parse_depcruise(json.loads(Path(args.depcruise_json).read_text(encoding="utf-8")))
+                data = json.loads(Path(args.depcruise_json).read_text(encoding="utf-8"))
             except (OSError, ValueError) as exc:
                 raise ValueError(f"cannot read {args.depcruise_json}: {exc}")
+            current = parse_depcruise(data)
         else:
-            config = args.config or next((c for c in DEPCRUISE_CONFIGS if (repo / c).exists()), None)
             if not config:
                 raise ValueError("no dependency-cruiser config found; run gen_boundaries.py --write or pass --config")
             sources = args.source or (["src"] if (repo / "src").is_dir() else ["."])
-            current = run_depcruise(repo, config, sources, args.timeout, env)
-            if current is None:
+            data = run_depcruise(repo, config, sources, args.timeout, env)
+            if data is None:
                 result.update(status="skipped", reason="skipped: dependency-cruiser not found")
                 return result
+            current = parse_depcruise(data)
+        found = unresolved_aliases(data, *alias_matchers(repo, config))
+        if found:
+            result["unresolved_aliases"] = found
+            warnings.append(alias_warning(found, config))
     else:
         tool = "archunitnet"
         if args.dotnet_output:
@@ -196,6 +306,7 @@ def check(repo: Path, args, env: Env) -> dict:
                 return result
             current = ran[0]
 
+    result["warnings"] = warnings
     baseline_path = repo / args.baseline
     if args.update_baseline:
         write_baseline(baseline_path, tool, current)
@@ -225,6 +336,8 @@ def human(result: dict) -> str:
         lines.append(f"  NEW   [{v['rule']}] {v['from']} -> {v['to']}")
     for v in result.get("fixed", []):
         lines.append(f"  fixed [{v['rule']}] {v['from']} -> {v['to']}")
+    for w in result.get("warnings", []):
+        lines.append(f"  warn: {w}")
     return "\n".join(lines)
 
 

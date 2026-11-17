@@ -86,7 +86,7 @@ class TestGenerateTs(TempRepo):
 
     def test_regex_matches_intent(self):
         # The pathNot index pattern, unescaped from the JS string, must accept index files only.
-        content = gen.render_depcruise(["src/billing", "src/users"], False)
+        content = gen.render_depcruise(["src/billing", "src/users"], None)
         literal = re.search(r'pathNot: \["\^\$1/", (".*?")\]', content).group(1)
         pattern = json.loads(literal)
         self.assertTrue(re.match(pattern, "src/users/index.ts"))
@@ -108,6 +108,47 @@ class TestGenerateTs(TempRepo):
 
     def test_bad_root(self):
         self.assertEqual(quiet(gen.main, [str(self.repo), "--root", "nope"])[0], 2)
+
+
+class TestGenerateTsConfig(TempRepo):
+    def setUp(self):
+        super().setUp()
+        self.repo_root = self.repo / "repo"
+        for rel in ("package.json", "src/billing/index.ts", "src/users/index.ts"):
+            self.touch("repo/" + rel)
+
+    def generate(self, *extra):
+        code, out = quiet(gen.main, [str(self.repo_root), "--json", *extra])
+        self.assertEqual(code, 0)
+        return json.loads(out)
+
+    def test_prefers_closest_tsconfig(self):
+        self.touch("repo/tsconfig.json", "{}")
+        self.touch("repo/src/tsconfig.json", "{}")
+        data = self.generate()
+        self.assertEqual(data["tsconfig"], "src/tsconfig.json")
+        self.assertIn('tsConfig: { fileName: "src/tsconfig.json" }', data["content"])
+
+    def test_finds_tsconfig_above_root(self):
+        self.touch("repo/tsconfig.json", "{}")
+        self.touch("repo/src/features/cart/index.ts")
+        self.touch("repo/src/features/checkout/index.ts")
+        data = self.generate("--root", "src/features")
+        self.assertEqual(data["tsconfig"], "tsconfig.json")
+        self.assertIn('tsConfig: { fileName: "tsconfig.json" }', data["content"])
+
+    def test_does_not_search_above_repo(self):
+        self.touch("tsconfig.json", "{}")  # outside the repo path argument
+        data = self.generate()
+        self.assertIsNone(data["tsconfig"])
+        self.assertNotIn("tsConfig", data["content"])
+
+    def test_emits_resolve_extensions_once(self):
+        self.touch("repo/tsconfig.json", "{}")
+        content = self.generate()["content"]
+        self.assertIn('enhancedResolveOptions: { extensions: [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"] }',
+                      content)
+        self.assertEqual(content.count("enhancedResolveOptions"), 1)
 
 
 class TestGenerateDotnet(TempRepo):
@@ -211,6 +252,75 @@ class TestCheckDepcruise(TempRepo):
     def test_missing_config_is_usage_error(self):
         self.touch("package.json", "{}")
         self.assertEqual(quiet(chk.main, [str(self.repo)], env=no_tools())[0], 2)
+
+
+def alias_report(deps):
+    return {"modules": [{"source": "src/billing/invoice.ts", "dependencies": deps}],
+            "summary": {"violations": [], "error": 0, "warn": 0, "info": 0, "totalCruised": 1}}
+
+
+class TestUnresolvedAliases(TempRepo):
+    def run_report(self, report, *extra):
+        path = self.touch("report.json", json.dumps(report))
+        return quiet(chk.main, [str(self.repo), "--depcruise-json", str(path), "--json", *extra], env=no_tools())
+
+    def test_unresolved_at_alias_warns_but_passes(self):
+        code, out = self.run_report(alias_report([
+            {"module": "@/credentials", "resolved": "@/credentials", "couldNotResolve": True},
+            {"module": "~/util", "resolved": "~/util", "couldNotResolve": True},
+            {"module": "@/ok", "resolved": "src/ok/index.ts", "couldNotResolve": False},
+            {"module": "left-pad", "resolved": "left-pad", "couldNotResolve": True},
+        ]))
+        data = json.loads(out)
+        self.assertEqual((code, data["status"]), (0, "pass"))
+        self.assertEqual([d["module"] for d in data["unresolved_aliases"]], ["@/credentials", "~/util"])
+        self.assertEqual(len(data["warnings"]), 1)
+        self.assertIn("'@/credentials' in src/billing/invoice.ts", data["warnings"][0])
+        self.assertIn("tsConfig", data["warnings"][0])
+
+    def test_human_output_shows_warning(self):
+        path = self.touch("report.json", json.dumps(alias_report(
+            [{"module": "@/credentials", "couldNotResolve": True}])))
+        code, out = quiet(chk.main, [str(self.repo), "--depcruise-json", str(path)], env=no_tools())
+        self.assertEqual(code, 0)
+        self.assertIn("warn: 1 unresolved import(s) look like path aliases", out)
+
+    def test_tsconfig_paths_keys_from_config_tsconfig(self):
+        self.touch(".dependency-cruiser.cjs",
+                   'module.exports = { options: { tsConfig: { fileName: "app/tsconfig.json" } } };')
+        self.touch("app/tsconfig.base.json", """{
+          // comments and trailing commas are allowed in tsconfig
+          "compilerOptions": { "paths": { "#lib/*": ["./lib/*"], "config": ["./config.ts"], "*": ["./t/*"], }, },
+        }""")
+        self.touch("app/tsconfig.json", '{ "extends": "./tsconfig.base", /* own paths */ '
+                                        '"compilerOptions": { "paths": { "@app/*": ["./src/*"] } } }')
+        code, out = self.run_report(alias_report([
+            {"module": "#lib/db", "couldNotResolve": True},
+            {"module": "@app/users", "couldNotResolve": True},
+            {"module": "config", "couldNotResolve": True},
+            {"module": "react", "couldNotResolve": True},
+        ]))
+        data = json.loads(out)
+        self.assertEqual(code, 0)
+        self.assertEqual([d["module"] for d in data["unresolved_aliases"]], ["#lib/db", "@app/users", "config"])
+        self.assertIn(".dependency-cruiser.cjs", data["warnings"][0])
+
+    def test_no_unresolved_aliases_no_warning(self):
+        code, out = self.run_report(alias_report([{"module": "left-pad", "couldNotResolve": True}]))
+        data = json.loads(out)
+        self.assertEqual(data["warnings"], [])
+        self.assertNotIn("unresolved_aliases", data)
+
+    def test_warns_on_update_baseline_too(self):
+        code, out = self.run_report(alias_report([{"module": "@/x", "couldNotResolve": True}]), "--update-baseline")
+        data = json.loads(out)
+        self.assertEqual((code, data["status"]), (0, "updated"))
+        self.assertEqual(len(data["warnings"]), 1)
+
+    def test_strip_jsonc_keeps_slashes_in_strings(self):
+        text = '{"paths": {"@/*": ["./src/*"]}, // c\n "u": "http://x", /* b */ "z": [1,],}'
+        self.assertEqual(json.loads(chk.strip_jsonc(text)),
+                         {"paths": {"@/*": ["./src/*"]}, "u": "http://x", "z": [1]})
 
 
 class TestCheckDotnet(TempRepo):

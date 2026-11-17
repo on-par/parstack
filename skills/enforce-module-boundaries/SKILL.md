@@ -23,6 +23,7 @@ python3 "${CLAUDE_SKILL_DIR}/scripts/gen_boundaries.py" [repo] --module src/bill
 - TS/JS writes `.dependency-cruiser.cjs` with two rules:
   - `no-circular`: no import cycles anywhere.
   - `no-cross-module-internals`: a file in one module may import another module only through its `index.(ts|tsx|js|jsx|mjs|cjs)`.
+  - Path aliases (`@/x`) resolve through the closest `tsconfig.json` from `--root` up to the repo root, set as `options.tsConfig`; check it is the tsconfig that defines `paths`. The check warns when alias imports stay unresolved.
 - .NET writes `ModuleBoundariesTests.cs` (ArchUnitNET + xUnit) into the first test project it finds, or the path given with `--out`. Each module namespace must not depend on any other module namespace. Folder modules get the namespace `<RootNamespace>.<Folder>`; set `--namespace-prefix` to override it. A module dir with its own csproj uses that project's namespace. The test project needs `TngTech.ArchUnitNET.xUnit` and references to the module assemblies.
 - An existing file is not overwritten without `--force`. Exit codes: 0 ok, 1 fewer than two modules found, 2 usage error.
 
