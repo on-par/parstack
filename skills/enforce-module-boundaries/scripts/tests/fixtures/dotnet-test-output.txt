@@ -1,0 +1,13 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  App.Tests -> /work/tests/App.Tests/bin/Debug/net8.0/App.Tests.dll
+Test run for /work/tests/App.Tests/bin/Debug/net8.0/App.Tests.dll (.NETCoreApp,Version=v8.0)
+Starting test execution, please wait...
+  Failed ModuleBoundaries.ModuleBoundariesTests.Module_must_not_depend_on_other_module(from: "App.Billing", to: "App.Users") [41 ms]
+  Error Message:
+   "Types that reside in namespace ..." should not depend on any "Types that reside in namespace ..." because App.Billing must not reach into App.Users
+  Failed ModuleBoundaries.ModuleBoundariesTests.Module_must_not_depend_on_other_module(from: "App.Users", to: "App.Orders") [3 ms]
+  Error Message:
+   failed
+
+Failed!  - Failed:     2, Passed:     4, Skipped:     0, Total:     6, Duration: 120 ms
