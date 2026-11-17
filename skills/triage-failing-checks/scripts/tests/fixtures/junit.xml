@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="math" tests="4" failures="1" errors="1">
+    <testcase classname="math.Add" name="adds_two" time="0.01"/>
+    <testcase classname="math.Add" name="adds_negative" time="0.01">
+      <failure message="expected -1">assert failed</failure>
+    </testcase>
+    <testcase classname="math.Div" name="by_zero" time="0.01">
+      <error message="boom">ZeroDivisionError</error>
+    </testcase>
+    <testcase name="no_class" time="0.01">
+      <skipped/>
+    </testcase>
+  </testsuite>
+</testsuites>
