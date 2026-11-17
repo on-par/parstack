@@ -1,0 +1,48 @@
+{
+  "blocked": [],
+  "counts": {
+    "blocked": 0,
+    "groups": 3,
+    "open": 5,
+    "runnable": 5
+  },
+  "cycles": [],
+  "layers": [
+    [
+      {
+        "number": 2,
+        "title": "Audit log table"
+      },
+      {
+        "number": 1,
+        "title": "Accounts table"
+      }
+    ],
+    [
+      {
+        "number": 4,
+        "title": "Log sign-ups"
+      },
+      {
+        "number": 3,
+        "title": "Sign-up form"
+      }
+    ],
+    [
+      {
+        "number": 5,
+        "title": "Welcome email"
+      }
+    ]
+  ],
+  "missing": [],
+  "order": [
+    2,
+    1,
+    4,
+    3,
+    5
+  ],
+  "stale": [],
+  "stale_days": 30
+}

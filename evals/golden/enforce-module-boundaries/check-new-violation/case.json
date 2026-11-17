@@ -1,0 +1,7 @@
+{
+  "description": "orders now reaches into billing internals, which is not in the baseline: fail on the one new violation",
+  "script": "check_boundaries.py",
+  "args": [".", "--depcruise-json", "depcruise.json", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 1
+}

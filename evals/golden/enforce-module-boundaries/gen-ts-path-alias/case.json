@@ -1,0 +1,7 @@
+{
+  "description": "TS repo with tsconfig paths \"@/*\": generated dependency-cruiser config sets options.tsConfig",
+  "script": "gen_boundaries.py",
+  "args": [".", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

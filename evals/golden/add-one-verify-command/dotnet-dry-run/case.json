@@ -1,0 +1,7 @@
+{
+  "description": ".NET solution with an xunit project: dry run proposes scripts/verify.sh chaining build and test",
+  "script": "make_verify.py",
+  "args": [".", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

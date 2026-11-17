@@ -1,0 +1,7 @@
+{
+  "description": "node repo with a pnpm lockfile: dry run proposes a package.json verify script run with pnpm",
+  "script": "make_verify.py",
+  "args": [".", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

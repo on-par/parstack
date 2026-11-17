@@ -1,0 +1,11 @@
+{
+  // path aliases: imports like "@/users" resolve to src/users
+  "compilerOptions": {
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+    },
+  },
+  "include": ["src"]
+}

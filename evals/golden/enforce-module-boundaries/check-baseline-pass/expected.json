@@ -1,0 +1,12 @@
+{
+  "baseline": "boundaries-baseline.json",
+  "baseline_count": 1,
+  "baseline_found": true,
+  "current_count": 1,
+  "fixed": [],
+  "new": [],
+  "reason": "no new violations",
+  "stack": "ts",
+  "status": "pass",
+  "warnings": []
+}

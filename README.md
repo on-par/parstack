@@ -70,6 +70,25 @@ python3 -m unittest discover -s skills -p 'test_*.py'
 
 Each skill is self-contained: no imports from another skill or the repo root. Test dirs need `__init__.py` from the skill dir down so discovery finds them; the validator checks this.
 
+## Evals: golden (every PR)
+
+Golden evals run each skill script against a saved fixture and compare the exit code and output to a saved result. They need no network and no optional tools, and they cost nothing to run.
+
+```
+python3 evals/run_golden.py                        # all cases
+python3 evals/run_golden.py --skill order-the-queue
+python3 evals/run_golden.py --changed-from origin/main
+python3 evals/run_golden.py --update               # rewrite expected output
+python3 -m unittest discover -s evals -p 'test_*.py'
+```
+
+- A case is `evals/golden/<skill>/<case>/` with `case.json` (script, args, cwd, expect_exit, optional git setup steps), a `fixture/` dir, and `expected.json`. If the script does not print JSON, the case uses `expected.txt` instead.
+- Each case runs in a temp copy of its fixture. PATH holds only `python3` and `git`, so optional tools always report as not found.
+- Before comparing, the runner replaces temp paths, the repo path, git SHAs, timings, and timestamps with fixed values. The rules are in the docstring of `evals/run_golden.py`.
+- `--changed-from REF` runs only skills with changes under `skills/<skill>/` or `evals/golden/<skill>/`. If the runner or `.github/` changed, it runs all cases.
+- `--update` never changes `expect_exit`, and it does not write a golden when the exit code is wrong. Read every changed `expected.json` before you commit it. A golden that records a bug is worse than no golden.
+- CI runs the cases for changed skills on PRs and all cases on push.
+
 ## License
 
 MIT. See [LICENSE](LICENSE).

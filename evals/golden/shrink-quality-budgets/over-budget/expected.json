@@ -1,0 +1,48 @@
+{
+  "config": "quality-budgets.json",
+  "note": "Raising a budget is a deliberate manual edit to the budgets file; --tighten never raises.",
+  "over": [
+    "loc",
+    "duplication"
+  ],
+  "rows": [
+    {
+      "budget": 10,
+      "delta": 1,
+      "metric": "loc",
+      "status": "over",
+      "value": 11
+    },
+    {
+      "budget": 10,
+      "delta": 0,
+      "metric": "comment_lines",
+      "status": "ok",
+      "value": 10
+    },
+    {
+      "budget": 3.0,
+      "delta": 1.2,
+      "metric": "duplication",
+      "status": "over",
+      "value": 4.2
+    },
+    {
+      "budget": 10,
+      "delta": -3,
+      "metric": "dead_code",
+      "status": "ok",
+      "value": 7
+    },
+    {
+      "budget": 3,
+      "delta": -1,
+      "metric": "boundary_violations",
+      "status": "ok",
+      "value": 2
+    }
+  ],
+  "status": "fail",
+  "tightened": [],
+  "unknown_budgets": []
+}

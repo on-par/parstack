@@ -1,0 +1,7 @@
+{
+  "description": "#20 needs unknown #99 (blocks, and #21 behind it); #22 needs closed #50 (satisfied, still reported)",
+  "script": "order_queue.py",
+  "args": ["--file", "issues.json", "--now", "2026-11-17T00:00:00Z", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 1
+}

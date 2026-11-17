@@ -1,0 +1,51 @@
+{
+  "base": "<SHA>",
+  "base_ref": "merge-base(HEAD, main)",
+  "cmd": "python3 check.py",
+  "counts": {
+    "already-broken": 1
+  },
+  "failures": [
+    {
+      "base": "fail",
+      "head": [
+        "fail"
+      ],
+      "id": "(command)",
+      "label": "already-broken"
+    }
+  ],
+  "head": "<SHA>",
+  "head_dirty": false,
+  "max_rounds": 3,
+  "message": "Only failures that also fail on base (or base was unclear). Not caused by this change; report them, do not fix in this change.",
+  "repeat": 1,
+  "round": 1,
+  "runs": [
+    {
+      "attempt": 1,
+      "duration_s": 0,
+      "error": false,
+      "exit_code": 1,
+      "failed": [
+        "(command)"
+      ],
+      "output_tail": "FAIL add(2, 3) = -1, want 5\n",
+      "where": "head"
+    },
+    {
+      "attempt": 1,
+      "duration_s": 0,
+      "error": false,
+      "exit_code": 1,
+      "failed": [
+        "(command)"
+      ],
+      "output_tail": "FAIL add(2, 3) = -1, want 5\n",
+      "where": "base"
+    }
+  ],
+  "skipped": [],
+  "state": null,
+  "status": "non-blocking"
+}

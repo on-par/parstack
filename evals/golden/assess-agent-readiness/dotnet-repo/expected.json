@@ -1,0 +1,116 @@
+{
+  "checks": [
+    {
+      "detail": "verify command: dotnet test App.sln",
+      "fix": "",
+      "id": "verify_command",
+      "status": "pass",
+      "weight": 20
+    },
+    {
+      "detail": "not run (use --runs N to time verify and detect flakiness)",
+      "fix": "",
+      "id": "verify_runs",
+      "status": "skipped",
+      "weight": 10
+    },
+    {
+      "detail": "no ArchUnitNET or NetArchTest reference",
+      "fix": "Add an architecture test project that forbids cross-module dependencies; see the enforce-module-boundaries skill.",
+      "id": "boundaries",
+      "status": "fail",
+      "weight": 15
+    },
+    {
+      "detail": "no explicit analyzer settings",
+      "fix": "Set <AnalysisLevel>latest-recommended</AnalysisLevel> and raise IDE0051/IDE0052 (unused members) to warning in .editorconfig.",
+      "id": "dead_code",
+      "status": "warn",
+      "weight": 10
+    },
+    {
+      "detail": "no duplication check (jscpd not found)",
+      "fix": "Add jscpd with a threshold, or track duplication with shrink-quality-budgets.",
+      "id": "duplication",
+      "status": "warn",
+      "weight": 5
+    },
+    {
+      "detail": "gitleaks not found; regex scan found nothing obvious",
+      "fix": "Add gitleaks to CI for a real secret scan.",
+      "id": "secrets",
+      "status": "warn",
+      "weight": 15
+    },
+    {
+      "detail": "no agent context file",
+      "fix": "Add AGENTS.md with the verify command, layout, and house rules an agent must follow.",
+      "id": "agent_context",
+      "status": "fail",
+      "weight": 10
+    },
+    {
+      "detail": "no CI config",
+      "fix": "Add CI that runs the verify command on every push and PR.",
+      "id": "ci",
+      "status": "fail",
+      "weight": 10
+    },
+    {
+      "detail": "1 test file(s), e.g. tests/App.Tests/App.Tests.csproj",
+      "fix": "",
+      "id": "tests",
+      "status": "pass",
+      "weight": 5
+    }
+  ],
+  "fixes": [
+    {
+      "fix": "Add an architecture test project that forbids cross-module dependencies; see the enforce-module-boundaries skill.",
+      "id": "boundaries",
+      "impact": 15.0,
+      "rank": 1,
+      "status": "fail"
+    },
+    {
+      "fix": "Add AGENTS.md with the verify command, layout, and house rules an agent must follow.",
+      "id": "agent_context",
+      "impact": 10.0,
+      "rank": 2,
+      "status": "fail"
+    },
+    {
+      "fix": "Add CI that runs the verify command on every push and PR.",
+      "id": "ci",
+      "impact": 10.0,
+      "rank": 3,
+      "status": "fail"
+    },
+    {
+      "fix": "Add gitleaks to CI for a real secret scan.",
+      "id": "secrets",
+      "impact": 7.5,
+      "rank": 4,
+      "status": "warn"
+    },
+    {
+      "fix": "Set <AnalysisLevel>latest-recommended</AnalysisLevel> and raise IDE0051/IDE0052 (unused members) to warning in .editorconfig.",
+      "id": "dead_code",
+      "impact": 5.0,
+      "rank": 5,
+      "status": "warn"
+    },
+    {
+      "fix": "Add jscpd with a threshold, or track duplication with shrink-quality-budgets.",
+      "id": "duplication",
+      "impact": 2.5,
+      "rank": 6,
+      "status": "warn"
+    }
+  ],
+  "min_score": 70,
+  "root": "<TMP>",
+  "score": 44,
+  "stack": "dotnet",
+  "verify_command": "dotnet test App.sln"
+}

@@ -1,0 +1,7 @@
+{
+  "description": "parent criterion AC3 is not covered by any slice criterion",
+  "script": "check_slices.py",
+  "args": ["slices.json", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 1
+}

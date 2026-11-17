@@ -1,0 +1,14 @@
+name: unsafe
+on:
+  issue_comment:
+    types: [created]
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo comment
+        run: |
+          echo "${{ github.event.comment.body }}"
+      - name: Title
+        with:
+          title: ${{ github.event.issue.title }}

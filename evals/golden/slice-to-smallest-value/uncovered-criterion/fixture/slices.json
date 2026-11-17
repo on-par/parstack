@@ -1,0 +1,35 @@
+{
+  "parent": {
+    "id": "P1",
+    "title": "Saved carts",
+    "criteria": [
+      {"id": "AC1", "text": "Signed-in user's cart survives a logout"},
+      {"id": "AC2", "text": "Cart merges with a guest cart on sign-in"},
+      {"id": "AC3", "text": "Saved carts expire after 30 days"}
+    ]
+  },
+  "slices": [
+    {
+      "id": "S1",
+      "title": "Keep the cart across sessions",
+      "value": "Users do not lose what they picked",
+      "scope": ["Persist cart per user", "Load cart on sign-in"],
+      "files": ["src/cart/store.ts"],
+      "criteria": [
+        {"id": "S1.1", "text": "Cart items are back after logout and login", "proof": "test_cart_persists_across_sessions", "covers": ["AC1"]}
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "S2",
+      "title": "Merge the guest cart on sign-in",
+      "value": "Items added before sign-in are kept",
+      "scope": ["Merge guest and saved carts"],
+      "files": ["src/cart/merge.ts"],
+      "criteria": [
+        {"id": "S2.1", "text": "Guest items appear in the saved cart after sign-in", "proof": "test_guest_cart_merges", "covers": ["AC2"]}
+      ],
+      "depends_on": ["S1"]
+    }
+  ]
+}

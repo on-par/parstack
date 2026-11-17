@@ -1,0 +1,22 @@
+{
+  "cycles": [],
+  "errors": [
+    {
+      "code": "weak-proof",
+      "message": "criterion S1.2: proof \"manual check on staging\" is manual; name an automated test, check, or command",
+      "slice": "S1"
+    }
+  ],
+  "layers": [
+    [
+      "S1"
+    ]
+  ],
+  "ok": false,
+  "order": [
+    "S1"
+  ],
+  "overlaps": [],
+  "slice_count": 1,
+  "warnings": []
+}

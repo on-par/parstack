@@ -1,0 +1,7 @@
+{
+  "description": "S2 and S3 depend on each other",
+  "script": "check_slices.py",
+  "args": ["slices.json", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 1
+}

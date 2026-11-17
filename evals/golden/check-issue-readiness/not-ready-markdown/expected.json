@@ -1,0 +1,37 @@
+{
+  "assumptions": [
+    "no scope section; assume scope is only what the criteria require",
+    "no out-of-scope section; assume anything not in the criteria is out of scope",
+    "no dependencies stated; assume none"
+  ],
+  "detected": {
+    "criteria": [],
+    "criteria_source": null,
+    "dependencies": [],
+    "dependencies_none": false,
+    "has_out_of_scope_section": false,
+    "has_scope_section": false,
+    "headings": [
+      "Open questions"
+    ],
+    "open_questions": [
+      "Which steps can be skipped?"
+    ],
+    "out_of_scope": [],
+    "proof_section_items": [],
+    "scope": [],
+    "unresolved": [
+      "TBD"
+    ]
+  },
+  "labels": [],
+  "missing": [
+    "no acceptance criteria: add an \"## Acceptance criteria\" list of observable outcomes",
+    "unresolved markers: TBD",
+    "open question: Which steps can be skipped?"
+  ],
+  "notes": [],
+  "source": "markdown",
+  "title": "Improve onboarding",
+  "verdict": "not-ready"
+}

@@ -1,0 +1,22 @@
+{
+  "files": ["src/unused.ts", "src/old.ts"],
+  "issues": [
+    {
+      "file": "package.json",
+      "owners": [],
+      "dependencies": [{ "name": "left-pad" }],
+      "devDependencies": [],
+      "exports": [],
+      "enumMembers": {}
+    },
+    {
+      "file": "src/a.ts",
+      "owners": [],
+      "dependencies": [],
+      "exports": [{ "name": "foo" }, { "name": "bar" }],
+      "types": [{ "name": "T" }],
+      "enumMembers": { "Color": [{ "name": "Red" }] },
+      "classMembers": {}
+    }
+  ]
+}

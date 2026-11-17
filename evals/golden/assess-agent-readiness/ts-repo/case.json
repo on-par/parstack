@@ -1,0 +1,7 @@
+{
+  "description": "tiny TS repo with a verify script, AGENTS.md, knip and jscpd, but no CI and no boundary rules: clears --min-score 70",
+  "script": "assess.py",
+  "args": [".", "--runs", "0", "--min-score", "70", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

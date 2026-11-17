@@ -1,0 +1,7 @@
+{
+  "description": "Jira-style JSON export (fields.summary, ADF description) with no criteria, a TBD marker, and an open question: not-ready",
+  "script": "check_issue.py",
+  "args": ["--json-file", "issue.json", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 1
+}

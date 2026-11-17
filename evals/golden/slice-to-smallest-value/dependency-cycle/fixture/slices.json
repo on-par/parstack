@@ -1,0 +1,46 @@
+{
+  "parent": {
+    "id": "P1",
+    "title": "Team invites",
+    "criteria": [
+      {"id": "AC1", "text": "Owner can invite a teammate by email"},
+      {"id": "AC2", "text": "Invitee can accept and join the team"},
+      {"id": "AC3", "text": "Owner can revoke a pending invite"}
+    ]
+  },
+  "slices": [
+    {
+      "id": "S1",
+      "title": "Send an invite email",
+      "value": "Owners can bring a teammate in",
+      "scope": ["Invite form", "Invite email"],
+      "files": ["src/teams/invite.ts"],
+      "criteria": [
+        {"id": "S1.1", "text": "Submitting an email sends one invite", "proof": "test_invite_sends_email", "covers": ["AC1"]}
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "S2",
+      "title": "Accept an invite",
+      "value": "Invitees join without support",
+      "scope": ["Accept link", "Membership record"],
+      "files": ["src/teams/accept.ts"],
+      "criteria": [
+        {"id": "S2.1", "text": "Following the link adds the user to the team", "proof": "test_accept_adds_member", "covers": ["AC2"]}
+      ],
+      "depends_on": ["S1", "S3"]
+    },
+    {
+      "id": "S3",
+      "title": "Revoke a pending invite",
+      "value": "Owners can undo a mistaken invite",
+      "scope": ["Revoke button", "Invalidate token"],
+      "files": ["src/teams/revoke.ts"],
+      "criteria": [
+        {"id": "S3.1", "text": "A revoked link shows an error", "proof": "test_revoked_invite_rejected", "covers": ["AC3"]}
+      ],
+      "depends_on": ["S2"]
+    }
+  ]
+}

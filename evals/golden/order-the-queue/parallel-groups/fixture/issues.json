@@ -1,0 +1,7 @@
+[
+  {"number": 1, "title": "Accounts table", "body": "No dependencies.", "labels": [{"name": "p1"}], "updatedAt": "2026-11-10T00:00:00Z", "state": "OPEN"},
+  {"number": 2, "title": "Audit log table", "body": "", "labels": [{"name": "p0"}], "updatedAt": "2026-11-10T00:00:00Z", "state": "OPEN"},
+  {"number": 3, "title": "Sign-up form", "body": "Depends on #1", "labels": [{"name": "p1"}], "updatedAt": "2026-11-10T00:00:00Z", "state": "OPEN"},
+  {"number": 4, "title": "Log sign-ups", "body": "Blocked by #1 and after #2.", "labels": [{"name": "p0"}], "updatedAt": "2026-11-10T00:00:00Z", "state": "OPEN"},
+  {"number": 5, "title": "Welcome email", "body": "depends on #3", "labels": [], "updatedAt": "2026-11-10T00:00:00Z", "state": "OPEN"}
+]

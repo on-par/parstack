@@ -1,0 +1,7 @@
+{
+  "description": "saved depcruise report with an unresolved \"@/x\" import: passes but warns that aliases are not resolving (left-pad is not an alias)",
+  "script": "check_boundaries.py",
+  "args": [".", "--depcruise-json", "depcruise.json", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

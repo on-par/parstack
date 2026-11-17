@@ -1,0 +1,8 @@
+{
+  "tool": "dependency-cruiser",
+  "count": 2,
+  "violations": [
+    {"rule": "no-cross-module-internals", "from": "src/billing/invoice.ts", "to": "src/users/internal/repo.ts"},
+    {"rule": "no-circular", "from": "src/users/a.ts", "to": "src/users/b.ts"}
+  ]
+}

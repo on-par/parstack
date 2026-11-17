@@ -1,0 +1,7 @@
+{
+  "description": "two slices with no dependency between them both edit the same file",
+  "script": "check_slices.py",
+  "args": ["slices.json", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 1
+}

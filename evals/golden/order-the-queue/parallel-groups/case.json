@@ -1,0 +1,7 @@
+{
+  "description": "clean graph: three Kahn layers, p0 before p1 within a layer",
+  "script": "order_queue.py",
+  "args": ["--file", "issues.json", "--priority-label", "p0,p1", "--now", "2026-11-17T00:00:00Z", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

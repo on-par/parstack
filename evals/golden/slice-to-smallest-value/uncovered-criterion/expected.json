@@ -1,0 +1,26 @@
+{
+  "cycles": [],
+  "errors": [
+    {
+      "code": "uncovered",
+      "message": "parent criterion AC3 is not covered by any slice",
+      "slice": null
+    }
+  ],
+  "layers": [
+    [
+      "S1"
+    ],
+    [
+      "S2"
+    ]
+  ],
+  "ok": false,
+  "order": [
+    "S1",
+    "S2"
+  ],
+  "overlaps": [],
+  "slice_count": 2,
+  "warnings": []
+}

@@ -1,0 +1,49 @@
+{
+  "blocked": [],
+  "counts": {
+    "blocked": 0,
+    "groups": 3,
+    "open": 4,
+    "runnable": 4
+  },
+  "cycles": [],
+  "layers": [
+    [
+      {
+        "number": 20,
+        "title": "Add search box"
+      },
+      {
+        "number": 23,
+        "title": "Saved searches"
+      }
+    ],
+    [
+      {
+        "number": 21,
+        "title": "Search results page"
+      }
+    ],
+    [
+      {
+        "number": 22,
+        "title": "Search filters"
+      }
+    ]
+  ],
+  "missing": [
+    {
+      "dependency": "#19",
+      "issue": 23,
+      "status": "closed"
+    }
+  ],
+  "order": [
+    20,
+    23,
+    21,
+    22
+  ],
+  "stale": [],
+  "stale_days": 30
+}

@@ -1,0 +1,95 @@
+{
+  "checks": [
+    {
+      "detail": "verify command: pnpm run verify",
+      "fix": "",
+      "id": "verify_command",
+      "status": "pass",
+      "weight": 20
+    },
+    {
+      "detail": "not run (use --runs N to time verify and detect flakiness)",
+      "fix": "",
+      "id": "verify_runs",
+      "status": "skipped",
+      "weight": 10
+    },
+    {
+      "detail": "dependency-cruiser installed but no rules config found",
+      "fix": "Write module boundary and no-circular rules (dependency-cruiser config).",
+      "id": "boundaries",
+      "status": "warn",
+      "weight": 15
+    },
+    {
+      "detail": "dead-code tool installed: knip",
+      "fix": "",
+      "id": "dead_code",
+      "status": "pass",
+      "weight": 10
+    },
+    {
+      "detail": "jscpd configured",
+      "fix": "",
+      "id": "duplication",
+      "status": "pass",
+      "weight": 5
+    },
+    {
+      "detail": "gitleaks not found; regex scan found nothing obvious",
+      "fix": "Add gitleaks to CI for a real secret scan.",
+      "id": "secrets",
+      "status": "warn",
+      "weight": 15
+    },
+    {
+      "detail": "agent context: AGENTS.md",
+      "fix": "",
+      "id": "agent_context",
+      "status": "pass",
+      "weight": 10
+    },
+    {
+      "detail": "no CI config",
+      "fix": "Add CI that runs the verify command on every push and PR.",
+      "id": "ci",
+      "status": "fail",
+      "weight": 10
+    },
+    {
+      "detail": "1 test file(s), e.g. src/index.test.ts",
+      "fix": "",
+      "id": "tests",
+      "status": "pass",
+      "weight": 5
+    }
+  ],
+  "fixes": [
+    {
+      "fix": "Add CI that runs the verify command on every push and PR.",
+      "id": "ci",
+      "impact": 10.0,
+      "rank": 1,
+      "status": "fail"
+    },
+    {
+      "fix": "Write module boundary and no-circular rules (dependency-cruiser config).",
+      "id": "boundaries",
+      "impact": 7.5,
+      "rank": 2,
+      "status": "warn"
+    },
+    {
+      "fix": "Add gitleaks to CI for a real secret scan.",
+      "id": "secrets",
+      "impact": 7.5,
+      "rank": 3,
+      "status": "warn"
+    }
+  ],
+  "min_score": 70,
+  "root": "<TMP>",
+  "score": 72,
+  "stack": "typescript",
+  "verify_command": "pnpm run verify"
+}

@@ -1,0 +1,7 @@
+{
+  "description": "every metric (LOC, comments, saved jscpd and knip reports, baseline count) at or under budget; the test file is excluded",
+  "script": "budgets.py",
+  "args": ["check", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

@@ -1,0 +1,35 @@
+{
+  "cmd": "python3 check.py",
+  "failures": [],
+  "history": [
+    {
+      "at": "<TIMESTAMP>",
+      "counts": {
+        "regression": 1
+      },
+      "head": "<SHA>"
+    },
+    {
+      "at": "<TIMESTAMP>",
+      "counts": {
+        "regression": 1
+      },
+      "head": "<SHA>"
+    },
+    {
+      "at": "<TIMESTAMP>",
+      "counts": {
+        "regression": 1
+      },
+      "head": "<SHA>"
+    }
+  ],
+  "max_rounds": 3,
+  "message": "3 rework rounds already spent on this branch and check (max 3). Stop. Escalate to a human with the last report; do not attempt another fix. A human can clear the count with --reset-rounds.",
+  "repeat": 1,
+  "round": 3,
+  "runs": [],
+  "skipped": [],
+  "state": ".triage-rounds.json",
+  "status": "escalate"
+}

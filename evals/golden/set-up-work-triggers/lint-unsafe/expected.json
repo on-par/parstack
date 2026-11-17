@@ -1,0 +1,8 @@
+{
+  "ok": false,
+  "path": "agent-run.yml",
+  "problems": [
+    "line 11: expression inside run: script",
+    "line 14: untrusted github.event.issue.title outside env:/if:"
+  ]
+}

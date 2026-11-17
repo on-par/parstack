@@ -1,0 +1,24 @@
+{
+  "parent": {
+    "id": "P1",
+    "title": "Users can export their orders",
+    "criteria": [
+      {"id": "AC1", "text": "User can download visible orders as CSV"},
+      {"id": "AC2", "text": "Export includes only the user's own orders"}
+    ]
+  },
+  "slices": [
+    {
+      "id": "S1",
+      "title": "Download visible orders as CSV",
+      "value": "Users can take their order list into a spreadsheet",
+      "scope": ["Export button", "CSV endpoint"],
+      "files": ["src/orders/export.ts", "web/pages/orders.tsx"],
+      "criteria": [
+        {"id": "S1.1", "text": "Clicking Export downloads the visible rows", "proof": "tests/orders/export.test.ts::downloads visible rows", "covers": ["AC1"]},
+        {"id": "S1.2", "text": "Another user's orders never appear in the file", "proof": "manual check on staging", "covers": ["AC2"]}
+      ],
+      "depends_on": []
+    }
+  ]
+}

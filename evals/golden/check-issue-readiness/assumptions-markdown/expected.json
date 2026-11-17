@@ -1,0 +1,40 @@
+{
+  "assumptions": [
+    "no proof for \"Results load fast for a 3-word query\"; assume a new automated test named after it proves it",
+    "no scope section; assume scope is only what the criteria require",
+    "no out-of-scope section; assume anything not in the criteria is out of scope",
+    "no dependencies stated; assume none",
+    "vague wording (fast) in \"Results load fast for a 3-word query\"; assume its proof sets the bar"
+  ],
+  "detected": {
+    "criteria": [
+      {
+        "proof": null,
+        "text": "Results load fast for a 3-word query"
+      },
+      {
+        "proof": "SearchTests.EmptyQueryShowsRecent",
+        "text": "Empty query shows recent items (test: SearchTests.EmptyQueryShowsRecent)"
+      }
+    ],
+    "criteria_source": "section",
+    "dependencies": [],
+    "dependencies_none": false,
+    "has_out_of_scope_section": false,
+    "has_scope_section": false,
+    "headings": [
+      "Acceptance criteria"
+    ],
+    "open_questions": [],
+    "out_of_scope": [],
+    "proof_section_items": [],
+    "scope": [],
+    "unresolved": []
+  },
+  "labels": [],
+  "missing": [],
+  "notes": [],
+  "source": "markdown",
+  "title": "Make the search page better",
+  "verdict": "ready-with-assumptions"
+}

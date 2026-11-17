@@ -1,0 +1,34 @@
+{
+  "parent": {
+    "id": "P1",
+    "title": "Search orders",
+    "criteria": [
+      {"id": "AC1", "text": "User can search orders by customer name"},
+      {"id": "AC2", "text": "User can filter orders by status"}
+    ]
+  },
+  "slices": [
+    {
+      "id": "S1",
+      "title": "Search orders by customer name",
+      "value": "Support finds a customer's orders in one step",
+      "scope": ["Search box", "Name query on the orders endpoint"],
+      "files": ["src/orders/query.ts", "web/pages/orders.tsx"],
+      "criteria": [
+        {"id": "S1.1", "text": "Typing a name lists only that customer's orders", "proof": "test_search_by_customer_name", "covers": ["AC1"]}
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "S2",
+      "title": "Filter orders by status",
+      "value": "Support sees only open orders when triaging",
+      "scope": ["Status dropdown", "Status filter on the orders endpoint"],
+      "files": ["src/orders/query.ts", "web/components/StatusFilter.tsx"],
+      "criteria": [
+        {"id": "S2.1", "text": "Choosing Open hides shipped orders", "proof": "test_filter_by_status", "covers": ["AC2"]}
+      ],
+      "depends_on": []
+    }
+  ]
+}

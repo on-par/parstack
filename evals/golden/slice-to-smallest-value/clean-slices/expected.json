@@ -1,0 +1,22 @@
+{
+  "cycles": [],
+  "errors": [],
+  "layers": [
+    [
+      "S1"
+    ],
+    [
+      "S2",
+      "S3"
+    ]
+  ],
+  "ok": true,
+  "order": [
+    "S1",
+    "S2",
+    "S3"
+  ],
+  "overlaps": [],
+  "slice_count": 3,
+  "warnings": []
+}
