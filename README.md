@@ -116,10 +116,15 @@ To run in CI:
 
 - On a PR that touches `skills/**` or the behavior evals, add the `run-evals` label. New pushes rerun it while the label stays.
 - Or start the `behavior-evals` workflow by hand from the Actions tab, with optional skills and model inputs.
-- Both need a repo secret named `ANTHROPIC_API_KEY`. Results go to the job summary.
-- Cost is bounded: 1 case per skill, a 300 s timeout and a $0.50 cap per case.
+- Auth: a repo secret named `CLAUDE_CODE_OAUTH_TOKEN`, made with `claude setup-token`. It uses the owner's Claude subscription. A repo secret named `ANTHROPIC_API_KEY` works as a fallback. The workflow passes only one of them to `claude`, because an API key overrides the token.
+- Only the owner's PRs from branches in this repo, and manual runs, get the secret. Labeled PRs from anyone else skip the job.
+- Results go to the job summary. Cost is bounded: 1 case per skill, a 300 s timeout and a $0.50 cap per case.
 
-The default model is `$PARSTACK_EVAL_MODEL` or `haiku`. Without `claude` on PATH the runner prints a notice and exits 0. In CI the `behavior-evals` workflow runs on PRs labeled `run-evals` (changed skills only) or by hand, and skips when no API key secret is set.
+The default model is `$PARSTACK_EVAL_MODEL` or `haiku`. Without `claude` on PATH the runner prints a notice and exits 0. With `--require-auth` it also exits 0 with a notice when neither `CLAUDE_CODE_OAUTH_TOKEN` nor `ANTHROPIC_API_KEY` is set; the workflow does the same check first and skips every later step.
+
+## Contributing
+
+This repo does not take outside pull requests. They are closed automatically. Open an issue instead.
 
 ## License
 

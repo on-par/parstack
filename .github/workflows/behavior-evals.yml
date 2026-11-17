@@ -1,7 +1,9 @@
 name: behavior-evals
 
 # Opt-in: runs real model calls. On a PR it runs only when the PR has the
-# 'run-evals' label; it can also be started by hand.
+# 'run-evals' label, was opened by the repo owner, and comes from a branch in
+# this repo; it can also be started by hand. Uses pull_request, never
+# pull_request_target, so PR code never runs with write tokens.
 on:
   pull_request:
     types: [labeled, synchronize, opened, reopened]
@@ -29,54 +31,73 @@ concurrency:
 
 jobs:
   behavior:
-    if: github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'run-evals')
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (contains(github.event.pull_request.labels.*.name, 'run-evals') &&
+       github.event.pull_request.user.login == 'patrob' &&
+       github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
+      # Pick one credential before anything else runs. CLAUDE_CODE_OAUTH_TOKEN
+      # (from `claude setup-token`) wins; ANTHROPIC_API_KEY is the fallback.
+      - name: Check auth
+        id: auth
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then
+            echo "mode=oauth" >> "$GITHUB_OUTPUT"
+          elif [ -n "$ANTHROPIC_API_KEY" ]; then
+            echo "mode=api_key" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Neither CLAUDE_CODE_OAUTH_TOKEN nor ANTHROPIC_API_KEY is set; skipping behavior evals."
+            echo "Behavior evals skipped: neither CLAUDE_CODE_OAUTH_TOKEN nor ANTHROPIC_API_KEY is set." >> "$GITHUB_STEP_SUMMARY"
+            echo "mode=none" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/checkout@v4
+        if: steps.auth.outputs.mode != 'none'
         with:
           fetch-depth: 0
           persist-credentials: false
 
       - uses: actions/setup-python@v5
+        if: steps.auth.outputs.mode != 'none'
         with:
           python-version: "3.12"
 
       - uses: actions/setup-node@v4
+        if: steps.auth.outputs.mode != 'none'
         with:
           node-version: "20"
 
       - name: Install Claude Code
+        if: steps.auth.outputs.mode != 'none'
         run: npm i -g @anthropic-ai/claude-code
 
-      - name: Check API key
-        id: key
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: |
-          if [ -z "$ANTHROPIC_API_KEY" ]; then
-            echo "::notice::ANTHROPIC_API_KEY is not set; skipping behavior evals."
-            echo "Behavior evals skipped: ANTHROPIC_API_KEY is not set." >> "$GITHUB_STEP_SUMMARY"
-            echo "present=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "present=true" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Configure git
-        if: steps.key.outputs.present == 'true'
+        if: steps.auth.outputs.mode != 'none'
         run: |
           git config --global user.name "ci"
           git config --global user.email "ci@example.invalid"
 
+      # Exactly one credential reaches claude. If ANTHROPIC_API_KEY is set it
+      # overrides the OAuth token, so in oauth mode it is forced empty. In
+      # api_key mode the OAuth variable is unset before the run.
       - name: Run behavior evals (pull request)
-        if: steps.key.outputs.present == 'true' && github.event_name == 'pull_request'
+        if: steps.auth.outputs.mode != 'none' && github.event_name == 'pull_request'
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          AUTH_MODE: ${{ steps.auth.outputs.mode }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ steps.auth.outputs.mode == 'oauth' && secrets.CLAUDE_CODE_OAUTH_TOKEN || '' }}
+          ANTHROPIC_API_KEY: ${{ steps.auth.outputs.mode == 'api_key' && secrets.ANTHROPIC_API_KEY || '' }}
           BASE_REF: ${{ github.base_ref }}
         run: |
+          if [ "$AUTH_MODE" = "api_key" ]; then unset CLAUDE_CODE_OAUTH_TOKEN; else unset ANTHROPIC_API_KEY; fi
           python3 evals/run_behavior.py \
             --changed-from "origin/$BASE_REF" \
-            --require-api-key \
+            --require-auth \
             --model haiku \
             --max-cases-per-skill 1 \
             --timeout 300 \
@@ -84,18 +105,21 @@ jobs:
             --summary-file "$GITHUB_STEP_SUMMARY"
 
       - name: Run behavior evals (manual)
-        if: steps.key.outputs.present == 'true' && github.event_name == 'workflow_dispatch'
+        if: steps.auth.outputs.mode != 'none' && github.event_name == 'workflow_dispatch'
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          AUTH_MODE: ${{ steps.auth.outputs.mode }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ steps.auth.outputs.mode == 'oauth' && secrets.CLAUDE_CODE_OAUTH_TOKEN || '' }}
+          ANTHROPIC_API_KEY: ${{ steps.auth.outputs.mode == 'api_key' && secrets.ANTHROPIC_API_KEY || '' }}
           SKILLS: ${{ inputs.skills }}
           MODEL: ${{ inputs.model }}
         run: |
+          if [ "$AUTH_MODE" = "api_key" ]; then unset CLAUDE_CODE_OAUTH_TOKEN; else unset ANTHROPIC_API_KEY; fi
           set -f
           skill_args=()
           for s in $SKILLS; do skill_args+=(--skill "$s"); done
           python3 evals/run_behavior.py \
             "${skill_args[@]}" \
-            --require-api-key \
+            --require-auth \
             --model "${MODEL:-haiku}" \
             --max-cases-per-skill 1 \
             --timeout 300 \
