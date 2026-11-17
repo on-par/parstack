@@ -304,6 +304,9 @@ class Options:
 def claude_command(case: Case, opts: Options, plugin_dir: Path = REPO_ROOT) -> list[str]:
     cmd = [
         "claude", "-p",
+        # Load only project settings so plugins enabled in the user's own
+        # settings do not compete with the plugin under test.
+        "--setting-sources", "project",
         "--plugin-dir", str(plugin_dir),
         "--model", opts.model,
         "--output-format", "stream-json",
@@ -318,7 +321,8 @@ def claude_command(case: Case, opts: Options, plugin_dir: Path = REPO_ROOT) -> l
 
 
 def rubric_command(opts: Options) -> list[str]:
-    cmd = ["claude", "-p", "--model", opts.rubric_model or opts.model,
+    cmd = ["claude", "-p", "--setting-sources", "project",
+           "--model", opts.rubric_model or opts.model,
            "--output-format", "json", "--max-turns", "1"]
     if opts.max_budget_usd is not None:
         cmd += ["--max-budget-usd", f"{opts.max_budget_usd:g}"]
@@ -568,8 +572,8 @@ def render_summary(results: list[dict[str, Any]], model: str) -> str:
             if not r["grades"]["skill_triggered"]:
                 why.append("skill not triggered")
             if r["grades"]["rubric"] is False:
-                why.append("rubric: " + r.get("rubric_reply", "FAIL").splitlines()[0][:200]
-                           if r.get("rubric_reply") else "rubric failed")
+                reply = " ".join((r.get("rubric_reply") or "").split())
+                why.append(("rubric: " + reply[:300]) if reply else "rubric failed")
             out.append(f"- `{r['id']}`: " + "; ".join(why))
     return "\n".join(out) + "\n"
 
