@@ -1,0 +1,30 @@
+{
+  "cycles": [],
+  "dropped": [],
+  "errors": [],
+  "external_dependencies": {},
+  "layers": [
+    [
+      "S1",
+      "S2"
+    ]
+  ],
+  "ok": true,
+  "order": [
+    "S1",
+    "S2"
+  ],
+  "overlaps": [],
+  "sizes": {
+    "S1": {
+      "directories": 3,
+      "files": 3
+    },
+    "S2": {
+      "directories": 3,
+      "files": 3
+    }
+  },
+  "slice_count": 2,
+  "warnings": []
+}

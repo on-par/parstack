@@ -16,6 +16,8 @@
       "value": "A locked-out user gets back in without support",
       "scope": ["Reset request form", "Email with token link", "New password form", "Token stored and consumed once"],
       "files": ["src/auth/reset.ts", "src/auth/routes.ts", "web/pages/reset.tsx"],
+      "out_of_scope": ["Link expiry", "Rate limiting"],
+      "context": "Reset tokens live in the existing sessions table.",
       "criteria": [
         {"id": "S1.1", "text": "Submitting a known email sends one link", "proof": "tests/auth/reset.test.ts::sends link for known email", "covers": ["AC1"]},
         {"id": "S1.2", "text": "Following the link and submitting a password logs the user in", "proof": "e2e/reset.spec.ts", "covers": ["AC3"]}
@@ -28,6 +30,7 @@
       "value": "A leaked old email cannot be used to take over an account",
       "scope": ["Store issued-at on token", "Reject tokens older than 60 minutes"],
       "files": ["src/auth/reset.ts"],
+      "out_of_scope": ["Configurable expiry time"],
       "criteria": [
         {"id": "S2.1", "text": "A 61-minute-old token is rejected with a clear message", "proof": "test_expired_token_rejected", "covers": ["AC2"]}
       ],
@@ -39,6 +42,7 @@
       "value": "Users are not spammed with reset emails",
       "scope": ["Count requests per email per hour", "Return 429 after 5"],
       "files": ["src/auth/rate_limit.ts"],
+      "out_of_scope": ["Per-IP limits"],
       "criteria": [
         {"id": "S3.1", "text": "The 6th request in an hour returns 429", "proof": "`npm test -- rate_limit`", "covers": ["AC4"]}
       ],

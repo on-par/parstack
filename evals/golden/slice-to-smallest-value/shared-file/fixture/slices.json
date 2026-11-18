@@ -14,6 +14,7 @@
       "value": "Support finds a customer's orders in one step",
       "scope": ["Search box", "Name query on the orders endpoint"],
       "files": ["src/orders/query.ts", "web/pages/orders.tsx"],
+      "out_of_scope": ["Search by order number"],
       "criteria": [
         {"id": "S1.1", "text": "Typing a name lists only that customer's orders", "proof": "test_search_by_customer_name", "covers": ["AC1"]}
       ],
@@ -25,6 +26,7 @@
       "value": "Support sees only open orders when triaging",
       "scope": ["Status dropdown", "Status filter on the orders endpoint"],
       "files": ["src/orders/query.ts", "web/components/StatusFilter.tsx"],
+      "out_of_scope": ["Custom status values"],
       "criteria": [
         {"id": "S2.1", "text": "Choosing Open hides shipped orders", "proof": "test_filter_by_status", "covers": ["AC2"]}
       ],

@@ -1,0 +1,52 @@
+{
+  "parent": {
+    "id": "P1",
+    "title": "Reset a forgotten password in the notes app",
+    "criteria": [
+      {"id": "AC1", "text": "User can request a reset link by email"},
+      {"id": "AC2", "text": "Reset links expire after one hour"}
+    ]
+  },
+  "slices": [
+    {
+      "id": "S1",
+      "title": "Request a reset link",
+      "value": "A locked-out user can get back to their notes",
+      "scope": ["Reset request form", "Email with a one-time link"],
+      "files": ["src/auth/reset.ts", "web/pages/reset.tsx"],
+      "out_of_scope": ["Link expiry"],
+      "criteria": [
+        {"id": "S1.1", "text": "Submitting a known email sends one link", "proof": "tests/reset.test.ts::sends link", "covers": ["AC1"]}
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "S2",
+      "title": "Expire reset links",
+      "value": "An old reset email cannot be used to take over an account",
+      "scope": [
+        "Store issued-at on the token",
+        "Reject tokens older than the configured expiry; when the expiry setting is unset, fall back to 60 minutes",
+        "Add an expiry setting to config/auth.ts and config/defaults.ts, read it in the token checker, the reset page loader, the email template renderer, the audit logger, and the admin settings page, and document it",
+        "Show an expired-link page",
+        "Log expired attempts"
+      ],
+      "files": [
+        "config/auth.ts", "config/defaults.ts", "config/schema.ts",
+        "src/auth/expiry.ts", "src/auth/reset.ts", "src/auth/tokens.ts", "src/auth/audit.ts",
+        "src/mail/reset_template.ts", "src/mail/expired_template.ts", "src/mail/send.ts",
+        "web/pages/reset.tsx", "web/pages/expired.tsx", "web/pages/admin-settings.tsx",
+        "docs/auth.md", "docs/config.md", "docs/admin.md"
+      ],
+      "out_of_scope": ["Per-user expiry"],
+      "criteria": [
+        {"id": "S2.1", "text": "A 61-minute-old link is rejected with a clear message", "proof": "tests/reset.test.ts::expires", "covers": ["AC2"]},
+        {"id": "S2.2", "text": "With the setting unset, links expire after 60 minutes", "proof": "test_default_expiry"},
+        {"id": "S2.3", "text": "The expired-link page offers a new link", "proof": "e2e/expired.spec.ts"},
+        {"id": "S2.4", "text": "Expired attempts are logged; the log line has the account id", "proof": "test_expired_attempt_logged"},
+        {"id": "S2.5", "text": "Admins can change the expiry", "proof": "`npm test -- admin-settings`"}
+      ],
+      "depends_on": ["S1"]
+    }
+  ]
+}

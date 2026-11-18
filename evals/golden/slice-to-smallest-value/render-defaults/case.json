@@ -1,0 +1,7 @@
+{
+  "description": "render with no flags: context and out_of_scope rendered, empty out_of_scope left out, no Part of line, no covers lines, external deps as-is, dropped ideas get no issue",
+  "script": "render.py",
+  "args": ["slices.json"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

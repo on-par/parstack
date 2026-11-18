@@ -1,0 +1,7 @@
+{
+  "description": "slice with 5 scope items, 5 criteria and 16 files in 5 directories: within limits, but warns on file count and on long or ;-joined items, and reports files and directories per slice",
+  "script": "check_slices.py",
+  "args": ["slices.json"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

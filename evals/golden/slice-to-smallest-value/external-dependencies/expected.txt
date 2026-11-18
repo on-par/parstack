@@ -1,0 +1,8 @@
+PASS: 2 slices, 0 errors, 0 warnings
+size:
+  S1: touches 2 files across 2 directories
+  S2: touches 1 file across 1 directory
+order (slices on one line can run in parallel):
+  1. S1
+  2. S2
+     S2 waits on external #40, acme/api#7, PROJ-12

@@ -1,0 +1,8 @@
+PASS: 1 slices, 0 errors, 0 warnings
+size:
+  S1: touches 2 files across 2 directories
+dropped from the parent (no slice):
+  - Share a note by email: already shipped (covered by #40)
+  - Real-time co-editing: needs a sync service the app does not have
+order (slices on one line can run in parallel):
+  1. S1

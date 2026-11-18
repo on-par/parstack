@@ -47,15 +47,19 @@ def ordered(doc: dict) -> list[dict]:
     return [by_id[sid] for sid in order]
 
 
-def render_slice(s: dict, parent: dict, issue_map: dict[str, str]) -> str:
+def render_slice(s: dict, parent: dict, issue_map: dict[str, str],
+                 parent_issue: str | None = None, show_covers: bool = False) -> str:
     parent_text = {c.get("id"): c.get("text", "") for c in as_list(parent.get("criteria"))
                    if isinstance(c, dict)}
     out = []
     out.append("## Value")
     out.append(str(s.get("value") or "").strip() or "_missing_")
-    if parent.get("title"):
-        pid = f" ({parent['id']})" if parent.get("id") else ""
-        out.append(f"\nPart of: {parent['title']}{pid}")
+    if parent_issue:
+        out.append(f"\nPart of {parent_issue}")
+    context = s.get("context")
+    if isinstance(context, str) and context.strip():
+        out.append("\n## Context")
+        out.append(context.strip())
     out.append("\n## Scope")
     out += [f"- {item}" for item in as_list(s.get("scope"))] or ["- _none listed_"]
     files = as_list(s.get("files"))
@@ -68,13 +72,16 @@ def render_slice(s: dict, parent: dict, issue_map: dict[str, str]) -> str:
             continue
         out.append(f"- [ ] {c.get('text', '').strip()}")
         out.append(f"  - proof: {str(c.get('proof') or '').strip() or '_missing_'}")
-        covers = [pc for pc in as_list(c.get("covers"))]
+        covers = [pc for pc in as_list(c.get("covers"))] if show_covers else []
         if covers:
             labels = ", ".join(f"{pc} ({parent_text[pc]})" if parent_text.get(pc) else pc
                                for pc in covers)
             out.append(f"  - covers: {labels}")
-    out.append("\n## Out of scope")
-    out.append("- Anything not listed under Scope.")
+    # No placeholder: an empty list leaves the section out so readiness checks notice.
+    out_of_scope = [str(x).strip() for x in as_list(s.get("out_of_scope")) if str(x).strip()]
+    if out_of_scope:
+        out.append("\n## Out of scope")
+        out += [f"- {item}" for item in out_of_scope]
     out.append("\n## Dependencies")
     deps = as_list(s.get("depends_on"))
     if deps:
@@ -90,6 +97,10 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("path", help="slice JSON file, markdown file with a ```json block, or - for stdin")
     ap.add_argument("--issue-map", metavar="ID=N,...",
                     help='map slice ids to issue numbers so dependencies render as "#N"')
+    ap.add_argument("--parent-issue", metavar="N",
+                    help='issue number of the parent; adds "Part of #N" to each body')
+    ap.add_argument("--show-covers", action="store_true",
+                    help="add a covers: line (parent criterion ids and text) under each criterion")
     ap.add_argument("--json", action="store_true",
                     help="print a JSON list of {id, title, body}")
     args = ap.parse_args(argv)
@@ -97,13 +108,20 @@ def main(argv: list[str] | None = None) -> int:
     try:
         doc = load_doc(args.path)
         issue_map = parse_issue_map(args.issue_map)
+        parent_issue = None
+        if args.parent_issue is not None:
+            num = args.parent_issue.strip().lstrip("#")
+            if not num.isdigit():
+                raise InputError(f"bad --parent-issue: {args.parent_issue!r} (want a number)")
+            parent_issue = f"#{num}"
     except InputError as exc:
         print(f"input error: {exc}", file=sys.stderr)
         return 2
 
     parent = doc.get("parent") or {}
     rendered = [{"id": s["id"], "title": str(s.get("title") or s["id"]),
-                 "body": render_slice(s, parent, issue_map)} for s in ordered(doc)]
+                 "body": render_slice(s, parent, issue_map, parent_issue, args.show_covers)}
+                for s in ordered(doc)]
     if args.json:
         print(json.dumps(rendered, indent=2))
     else:

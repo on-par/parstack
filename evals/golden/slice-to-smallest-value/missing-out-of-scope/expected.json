@@ -1,0 +1,43 @@
+{
+  "cycles": [],
+  "dropped": [],
+  "errors": [],
+  "external_dependencies": {},
+  "layers": [
+    [
+      "S1"
+    ],
+    [
+      "S2"
+    ]
+  ],
+  "ok": true,
+  "order": [
+    "S1",
+    "S2"
+  ],
+  "overlaps": [],
+  "sizes": {
+    "S1": {
+      "directories": 2,
+      "files": 2
+    },
+    "S2": {
+      "directories": 1,
+      "files": 1
+    }
+  },
+  "slice_count": 2,
+  "warnings": [
+    {
+      "code": "no-out-of-scope",
+      "message": "slice lists no out_of_scope items; name what it will not do",
+      "slice": "S1"
+    },
+    {
+      "code": "no-out-of-scope",
+      "message": "slice lists no out_of_scope items; name what it will not do",
+      "slice": "S2"
+    }
+  ]
+}

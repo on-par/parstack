@@ -1,0 +1,11 @@
+PASS: 2 slices, 0 errors, 4 warnings
+  warning [S2] scope item 2 joins several changes with ";"; split it into separate items or slices
+  warning [S2] scope item 3 is 208 chars (over 200); split it into separate items or slices
+  warning [S2] touches 16 files across 5 directories (over 10); consider splitting
+  warning [S2] criterion S2.4 joins several changes with ";"; split it into separate criteria
+size:
+  S1: touches 2 files across 2 directories
+  S2: touches 16 files across 5 directories
+order (slices on one line can run in parallel):
+  1. S1
+  2. S2

@@ -1,0 +1,40 @@
+{
+  "parent": {
+    "id": "P1",
+    "title": "Reset a forgotten password in the notes app",
+    "criteria": [
+      {"id": "AC1", "text": "User can request a reset link by email"},
+      {"id": "AC2", "text": "Reset links expire after one hour"},
+      {"id": "AC3", "text": "The reset flow is documented and fast"}
+    ]
+  },
+  "slices": [
+    {
+      "id": "S1",
+      "title": "Request a reset link",
+      "value": "A locked-out user can get back to their notes",
+      "scope": ["Reset request form", "Email with a one-time link"],
+      "files": ["src/auth/reset.ts", "web/pages/reset.tsx"],
+      "out_of_scope": ["Link expiry"],
+      "criteria": [
+        {"id": "S1.1", "text": "Submitting a known email sends one link", "proof": "`npm test -- reset`", "covers": ["AC1"]},
+        {"id": "S1.2", "text": "The reset flow is described for support staff", "proof": "see docs/guide.md", "covers": ["AC3"]}
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "S2",
+      "title": "Expire reset links",
+      "value": "An old reset email cannot be used to take over an account",
+      "scope": ["Store issued-at on the token", "Reject tokens older than 60 minutes"],
+      "files": ["src/auth/expiry.ts"],
+      "out_of_scope": ["Configurable expiry time"],
+      "criteria": [
+        {"id": "S2.1", "text": "A 61-minute-old link is rejected with a clear message", "proof": "tests/reset.test.ts::expires", "covers": ["AC2"]},
+        {"id": "S2.2", "text": "An expired token gets a 410 response", "proof": "test_expired_token", "covers": ["AC2"]},
+        {"id": "S2.3", "text": "PR body records reset timings before and after", "proof": "PR body lists timings", "covers": ["AC3"]}
+      ],
+      "depends_on": ["S1"]
+    }
+  ]
+}

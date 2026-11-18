@@ -1,5 +1,6 @@
 {
   "cycles": [],
+  "dropped": [],
   "errors": [
     {
       "code": "weak-proof",
@@ -7,6 +8,7 @@
       "slice": "S1"
     }
   ],
+  "external_dependencies": {},
   "layers": [
     [
       "S1"
@@ -17,6 +19,12 @@
     "S1"
   ],
   "overlaps": [],
+  "sizes": {
+    "S1": {
+      "directories": 2,
+      "files": 2
+    }
+  },
   "slice_count": 1,
   "warnings": []
 }

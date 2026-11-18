@@ -5,6 +5,7 @@
       "S3"
     ]
   ],
+  "dropped": [],
   "errors": [
     {
       "code": "cycle",
@@ -12,6 +13,7 @@
       "slice": null
     }
   ],
+  "external_dependencies": {},
   "layers": [
     [
       "S1"
@@ -22,6 +24,20 @@
     "S1"
   ],
   "overlaps": [],
+  "sizes": {
+    "S1": {
+      "directories": 1,
+      "files": 1
+    },
+    "S2": {
+      "directories": 1,
+      "files": 1
+    },
+    "S3": {
+      "directories": 1,
+      "files": 1
+    }
+  },
   "slice_count": 3,
   "warnings": []
 }

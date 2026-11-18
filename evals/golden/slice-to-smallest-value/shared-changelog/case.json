@@ -1,0 +1,7 @@
+{
+  "description": "two independent slices both append to CHANGELOG.md, which is listed in shared_files: no file-overlap error",
+  "script": "check_slices.py",
+  "args": ["slices.json", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}
