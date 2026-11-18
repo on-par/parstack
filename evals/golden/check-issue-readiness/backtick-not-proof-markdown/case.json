@@ -1,0 +1,7 @@
+{
+  "description": "a backticked word in a criterion is not its proof; a proof: child line is; 'Dependencies: None.' in the section means no dependencies",
+  "script": "check_issue.py",
+  "args": ["--file", "issue.md", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

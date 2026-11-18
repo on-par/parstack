@@ -1,0 +1,7 @@
+{
+  "description": "an Assumptions section is counted, and a documented dependency assumption replaces the auto 'no dependencies stated' one: ready, text output",
+  "script": "check_issue.py",
+  "args": ["--file", "issue.md"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

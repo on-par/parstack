@@ -1,0 +1,17 @@
+# Expire reset links in the notes app
+
+## Scope
+- Reject reset tokens older than 60 minutes
+
+## Out of scope
+- Changing the reset email template
+
+## Acceptance criteria
+- [ ] A 61-minute-old reset link shows "link expired"
+  - proof: test_expired_reset_link_rejected
+
+## Dependencies
+- Depends on #12
+
+## Related
+- #40

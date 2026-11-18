@@ -1,6 +1,7 @@
 {
   "assumptions": [],
   "detected": {
+    "assumptions_documented": 0,
     "criteria": [
       {
         "proof": "test_expired_token_rejected",
@@ -16,6 +17,8 @@
       "#41"
     ],
     "dependencies_none": false,
+    "dependencies_unresolved": [],
+    "documented_assumptions": [],
     "has_out_of_scope_section": true,
     "has_scope_section": true,
     "headings": [

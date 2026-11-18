@@ -1,0 +1,7 @@
+{
+  "description": "refs after 'builds on' or 'related', prose 'after #N', and a Related section are not dependencies: ready with none",
+  "script": "check_issue.py",
+  "args": ["--file", "issue.md", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}
