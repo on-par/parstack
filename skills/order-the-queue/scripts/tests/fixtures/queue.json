@@ -4,7 +4,7 @@
   {"number": 3, "title": "Rate limit login", "body": "Blocked by #1.", "labels": [{"name": "p0"}], "updatedAt": "2026-11-10T00:00:00Z", "state": "OPEN"},
   {"number": 4, "title": "Report export", "body": "", "labels": [], "updatedAt": "2026-08-01T00:00:00Z", "state": "OPEN"},
   {"number": 5, "title": "Billing hook", "body": "Requires #99", "labels": [], "updatedAt": "2026-11-10T00:00:00Z", "state": "OPEN"},
-  {"number": 6, "title": "Invoice email", "body": "after #5", "labels": [], "updatedAt": "2026-11-10T00:00:00Z", "state": "OPEN"},
+  {"number": 6, "title": "Invoice email", "body": "Blocked by #5", "labels": [], "updatedAt": "2026-11-10T00:00:00Z", "state": "OPEN"},
   {"number": 7, "title": "Cycle A", "body": "depends on #8", "labels": [], "updatedAt": "2026-11-10T00:00:00Z", "state": "OPEN"},
   {"number": 8, "title": "Cycle B", "body": "depends on #7", "labels": [], "updatedAt": "2026-11-10T00:00:00Z", "state": "OPEN"},
   {"number": 9, "title": "Uses finished work", "body": "Depends on #50\n```\ndepends on #77\n```", "labels": [], "updatedAt": "2026-11-10T00:00:00Z", "state": "OPEN"},

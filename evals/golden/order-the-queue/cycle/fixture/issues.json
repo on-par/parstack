@@ -2,5 +2,5 @@
   {"number": 10, "title": "Payments client", "body": "", "labels": [], "updatedAt": "2026-11-10T00:00:00Z", "state": "OPEN"},
   {"number": 11, "title": "Refund flow", "body": "Depends on #10 and #12", "labels": [], "updatedAt": "2026-11-10T00:00:00Z", "state": "OPEN"},
   {"number": 12, "title": "Refund emails", "body": "Blocked by #13", "labels": [], "updatedAt": "2026-11-10T00:00:00Z", "state": "OPEN"},
-  {"number": 13, "title": "Refund ledger", "body": "after #11", "labels": [], "updatedAt": "2026-11-10T00:00:00Z", "state": "OPEN"}
+  {"number": 13, "title": "Refund ledger", "body": "Requires #11", "labels": [], "updatedAt": "2026-11-10T00:00:00Z", "state": "OPEN"}
 ]

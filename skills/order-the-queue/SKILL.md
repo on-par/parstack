@@ -46,7 +46,11 @@ Indented lines belong to the item above. `[x]` marks a closed item.
 
 ## How dependencies are read
 
-- Body phrases: "depends on #N", "blocked by #N", "blocked on #N", "requires #N", "after #N". Lists work: "depends on #3, #4 and #5". Code blocks and inline code are ignored.
+The body rules are the same as check-issue-readiness:
+
+- Body phrases: "depends on #N", "blocked by #N", "blocked on #N", "requires #N". Lists work: "depends on #3, #4 and #5".
+- Under a `## Dependencies` heading, a line that starts with a ref (`- #12 Session store`) counts too, unless it says "related", "see also", "builds on", "follow-up" or "duplicate".
+- Not dependencies: "after #N", "builds on #N", "Related: #N", anything under a `## Related` heading, and "Dependencies: None.". Code blocks and inline code are ignored.
 - Labels: `depends-on-12`, `blocked-by:12`, `after #12`.
 - `owner/repo#N` is reported as external and not checked.
 

@@ -90,7 +90,7 @@ class MarkdownTests(unittest.TestCase):
 class AnalyzeTests(unittest.TestCase):
     def test_multiple_refs_in_one_phrase(self):
         deps, ext = oq.parse_deps(issue(1, "Depends on #2, #3 and #4; after #5"))
-        self.assertEqual(deps, [2, 3, 4, 5])
+        self.assertEqual(deps, [2, 3, 4])
         self.assertEqual(ext, [])
 
     def test_label_dependencies(self):
@@ -116,6 +116,36 @@ class AnalyzeTests(unittest.TestCase):
         self.assertEqual(statuses, ["closed", "open-not-listed", "unknown"])
 
 
+class DependencyRuleTests(unittest.TestCase):
+    """Only explicit verbs or bullets in a Dependencies section make an edge."""
+
+    def test_shared_cases(self):
+        cases = json.loads((FIXTURES / "dependency_cases.json").read_text(encoding="utf-8"))
+        for case in cases:
+            with self.subTest(case["name"]):
+                local, external = oq.parse_deps(issue(1, case["body"]))
+                self.assertEqual([f"#{n}" for n in local] + external, case["refs"])
+
+    def test_prose_refs_do_not_order_the_queue(self):
+        r = oq.analyze([
+            issue(12, "Builds on merged #40."),
+            issue(33, "Related: #40, #41"),
+            issue(40, "The reset email test fails after #33 lands."),
+            issue(41, "## Related\n- #12\n\nDependencies: None."),
+        ])
+        self.assertEqual(numbers(r["layers"]), [[12, 33, 40, 41]])
+        self.assertEqual(r["missing"], [])
+
+    def test_explicit_verbs_still_order_the_queue(self):
+        r = oq.analyze([issue(11), issue(12, "Depends on #11"), issue(13, "Blocked by #12"),
+                        issue(14, "Requires #13")])
+        self.assertEqual(numbers(r["layers"]), [[11], [12], [13], [14]])
+
+    def test_markdown_after_is_not_a_dependency(self):
+        issues = oq.from_markdown("- #20 Search box\n- #21 Results page (after #20)\n")
+        self.assertEqual(numbers(oq.analyze(issues)["layers"]), [[20, 21]])
+
+
 class GithubTests(unittest.TestCase):
     def test_gh_missing_is_skipped(self):
         code, out = call(["--gh", "--json"], which=lambda _: None)
@@ -125,7 +155,7 @@ class GithubTests(unittest.TestCase):
     def test_gh_list_and_lookup(self):
         listing = [{"number": 1, "title": "A", "body": "depends on #9", "labels": [],
                     "updatedAt": "2026-11-16T00:00:00Z", "state": "OPEN"},
-                   {"number": 2, "title": "B", "body": "after #1", "labels": [],
+                   {"number": 2, "title": "B", "body": "Requires #1", "labels": [],
                     "updatedAt": "2026-11-16T00:00:00Z", "state": "OPEN"}]
         calls = []
 
