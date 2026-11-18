@@ -1,0 +1,7 @@
+{
+  "description": "render with --parent-issue, --show-covers and --issue-map: Part of #12, covers lines, slice deps mapped, external deps as-is",
+  "script": "render.py",
+  "args": ["slices.json", "--parent-issue", "12", "--show-covers", "--issue-map", "S1=41"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

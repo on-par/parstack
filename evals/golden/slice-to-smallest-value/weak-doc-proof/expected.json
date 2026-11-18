@@ -1,0 +1,49 @@
+{
+  "cycles": [],
+  "dropped": [],
+  "errors": [
+    {
+      "code": "weak-proof",
+      "message": "criterion S1.2: proof \"see docs/guide.md\" names a file that is not a test; name a test file (*.test.*, *_test.*, test_*, tests/...), file::test, or a `command`",
+      "slice": "S1"
+    },
+    {
+      "code": "weak-proof",
+      "message": "criterion S2.3: proof \"PR body lists timings\" does not name a test or check (use a test name, file::test, or a `command`)",
+      "slice": "S2"
+    }
+  ],
+  "external_dependencies": {},
+  "layers": [
+    [
+      "S1"
+    ],
+    [
+      "S2"
+    ]
+  ],
+  "ok": false,
+  "order": [
+    "S1",
+    "S2"
+  ],
+  "overlaps": [],
+  "sizes": {
+    "S1": {
+      "directories": 2,
+      "files": 2
+    },
+    "S2": {
+      "directories": 1,
+      "files": 1
+    }
+  },
+  "slice_count": 2,
+  "warnings": [
+    {
+      "code": "prose-criterion",
+      "message": "criterion S2.3 is about PR prose (\"PR body\"), which no test can prove; make it a check or move it to the PR description",
+      "slice": "S2"
+    }
+  ]
+}

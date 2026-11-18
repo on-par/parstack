@@ -1,0 +1,7 @@
+{
+  "description": "a slice with an empty out_of_scope list and one with none at all: pass with a warning for each",
+  "script": "check_slices.py",
+  "args": ["slices.json", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

@@ -15,6 +15,7 @@
       "value": "Owners can bring a teammate in",
       "scope": ["Invite form", "Invite email"],
       "files": ["src/teams/invite.ts"],
+      "out_of_scope": ["Bulk invites"],
       "criteria": [
         {"id": "S1.1", "text": "Submitting an email sends one invite", "proof": "test_invite_sends_email", "covers": ["AC1"]}
       ],
@@ -26,6 +27,7 @@
       "value": "Invitees join without support",
       "scope": ["Accept link", "Membership record"],
       "files": ["src/teams/accept.ts"],
+      "out_of_scope": ["Choosing a role on accept"],
       "criteria": [
         {"id": "S2.1", "text": "Following the link adds the user to the team", "proof": "test_accept_adds_member", "covers": ["AC2"]}
       ],
@@ -37,6 +39,7 @@
       "value": "Owners can undo a mistaken invite",
       "scope": ["Revoke button", "Invalidate token"],
       "files": ["src/teams/revoke.ts"],
+      "out_of_scope": ["Revoking accepted members"],
       "criteria": [
         {"id": "S3.1", "text": "A revoked link shows an error", "proof": "test_revoked_invite_rejected", "covers": ["AC3"]}
       ],

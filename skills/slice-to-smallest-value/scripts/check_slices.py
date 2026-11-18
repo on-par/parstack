@@ -18,6 +18,8 @@ from pathlib import Path
 
 MAX_SCOPE = 5
 MAX_CRITERIA = 5
+MAX_FILES = 10      # more files than this is a warning, not an error
+MAX_ITEM_CHARS = 200  # a scope item or criterion longer than this is probably several
 
 VAGUE_PROOFS = {
     "", "-", "n/a", "na", "none", "tbd", "todo", "tba", "?", "works", "it works",
@@ -31,11 +33,27 @@ COMMAND_WORDS = {
     "python3", "go", "cargo", "make", "just", "mvn", "gradle", "jest", "vitest",
     "playwright", "cypress", "curl", "gh", "bash", "sh", "deno", "rspec", "phpunit",
 }
-CONCRETE_RE = re.compile(
-    r"`[^`]+`"                      # backticked command or identifier
-    r"|\"[^\"]{3,}\"|'[^']{3,}'"    # quoted test name
-    r"|\w+(?:[._/:]|::)\w+"         # dotted, pathed or namespaced identifier
-    r"|\btest_\w+|\w+Test\b|\w+Tests\b|\w+_spec\b"
+BACKTICK_RE = re.compile(r"`([^`]+)`")
+QUOTED_RE = re.compile(r"\"[^\"]{3,}\"|'[^']{3,}'")   # quoted test name
+NAMESPACED_RE = re.compile(r"\w(?:[\w./-]*\w)?::\w")      # file::test or pkg::Test
+TEST_NAME_RE = re.compile(r"\btest_\w+|\b\w+Tests?\b|\bTest[A-Z]\w*|\b\w+_spec\b")
+PATH_RE = re.compile(r"[\w.-]+(?:/[\w.-]+)+/?|[\w-]+\.[A-Za-z]\w*")
+TEST_PATH_RE = re.compile(
+    r"(?:^|/)(?:tests?|__tests__|specs?|e2e)/"          # under a test directory
+    r"|(?:^|/)test_[\w-]+\.\w+$"                         # test_reset.py
+    r"|[\w-]_(?:test|spec)\.\w+$"                         # reset_test.go, reset_spec.rb
+    r"|\.(?:test|spec)\.\w+$"                              # reset.test.ts, reset.spec.ts
+    r"|_spec\b"
+)
+PROSE_RE = re.compile(
+    r"\b(?:PR|pull request)(?:'s)?\s+(?:body|description|text|notes?|comments?|records?|"
+    r"lists?|mentions?|says|includes?|documents?|explains?|shows?)\b",
+    re.IGNORECASE,
+)
+EXTERNAL_DEP_RE = re.compile(
+    r"^(?:#\d+"                                # #40
+    r"|[\w.-]+/[\w.-]+#\d+"                   # owner/repo#7
+    r"|[A-Z][A-Z0-9]+-\d+)$"                   # PROJ-12
 )
 _LAYER = (r"(?:backend|frontend|front-end|back-end|database|db|schema|migrations?|models?|"
           r"api|ui|endpoints?|data|service|infrastructure|infra|scaffold(?:ing)?|"
@@ -94,8 +112,24 @@ def as_list(value) -> list:
     return value if isinstance(value, list) else []
 
 
+def is_test_path(token: str) -> bool:
+    return bool(TEST_PATH_RE.search(token.strip().removeprefix("./")))
+
+
+def is_command(text: str) -> bool:
+    words = re.findall(r"[A-Za-z0-9_./-]+", text.lower())
+    return bool(words) and words[0] in COMMAND_WORDS
+
+
+def names_test(text: str) -> bool:
+    """True when text names a test: file::test, a test name, or a test file path."""
+    if NAMESPACED_RE.search(text) or TEST_NAME_RE.search(text):
+        return True
+    return any(is_test_path(m.group(0)) for m in PATH_RE.finditer(text))
+
+
 def proof_problem(proof) -> str | None:
-    """Return why a proof is not acceptable, or None if it names a test or check."""
+    """Return why a proof is not acceptable, or None if it names a test or command."""
     if not isinstance(proof, str) or not proof.strip():
         return "proof is empty"
     p = proof.strip()
@@ -105,12 +139,50 @@ def proof_problem(proof) -> str | None:
     if low.startswith(VAGUE_PREFIXES):
         return f'proof "{p}" is manual; name an automated test, check, or command'
     body = re.sub(r"^(test|check|cmd|command|proof)\s*:\s*", "", p, flags=re.IGNORECASE)
-    if CONCRETE_RE.search(body):
+    for m in BACKTICK_RE.finditer(body):
+        code = m.group(1).strip()
+        # a backticked command (has arguments or starts with a known tool) or test name
+        if " " in code or is_command(code) or names_test(code):
+            return None
+    plain = BACKTICK_RE.sub(" ", body)
+    if names_test(plain) or QUOTED_RE.search(plain) or is_command(plain):
         return None
-    words = re.findall(r"[A-Za-z0-9_-]+", body.lower())
-    if words and words[0] in COMMAND_WORDS:
-        return None
+    if PATH_RE.search(body):
+        return (f'proof "{p}" names a file that is not a test; name a test file '
+                f'(*.test.*, *_test.*, test_*, tests/...), file::test, or a `command`')
     return f'proof "{p}" does not name a test or check (use a test name, file::test, or a `command`)'
+
+
+def packed_problem(text: str) -> str | None:
+    """Return why one scope item or criterion looks like several, or None."""
+    if len(text) > MAX_ITEM_CHARS:
+        return f"is {len(text)} chars (over {MAX_ITEM_CHARS})"
+    if ";" in text:
+        return 'joins several changes with ";"'
+    return None
+
+
+def directory_of(path: str) -> str:
+    path = path.strip().removeprefix("./")
+    if path.endswith("/"):
+        return path.rstrip("/") or "."
+    head = path.rsplit("/", 1)[0] if "/" in path else "."
+    return head or "."
+
+
+def is_shared(path: str, shared: list[str]) -> bool:
+    path = path.strip().removeprefix("./")
+    for sh in shared:
+        sh = sh.strip().removeprefix("./")
+        if not sh:
+            continue
+        if path == sh:
+            return True
+        if any(ch in sh for ch in "*?[") and fnmatch.fnmatch(path, sh):
+            return True
+        if sh.endswith("/") and path.startswith(sh):
+            return True
+    return False
 
 
 def files_overlap(a: str, b: str) -> bool:
@@ -218,6 +290,26 @@ def check(doc: dict) -> dict:
     if not parent_ids:
         warn("no-parent-criteria", "parent has no criteria; coverage cannot be checked")
 
+    dropped = []
+    raw_dropped = parent.get("dropped", [])
+    if not isinstance(raw_dropped, list):
+        err("schema", '"parent.dropped" must be a list')
+        raw_dropped = []
+    for n, d in enumerate(raw_dropped, 1):
+        if not isinstance(d, dict) or not str(d.get("text") or "").strip():
+            err("schema", f"dropped idea #{n} has no text")
+            continue
+        entry = {"text": str(d["text"]).strip(), "reason": str(d.get("reason") or "").strip(),
+                 "covered_by": str(d.get("covered_by") or "").strip()}
+        if not entry["reason"]:
+            err("dropped-without-reason", f'dropped idea "{entry["text"]}" has no reason')
+        dropped.append(entry)
+
+    shared_files = doc.get("shared_files", [])
+    if not isinstance(shared_files, list) or not all(isinstance(f, str) for f in shared_files):
+        err("schema", '"shared_files" must be a list of paths')
+        shared_files = []
+
     slices = [s for s in doc["slices"] if isinstance(s, dict)]
     if len(slices) != len(doc["slices"]):
         err("schema", "every entry in slices must be an object")
@@ -235,6 +327,8 @@ def check(doc: dict) -> dict:
         ids.append(sid)
 
     graph: dict[str, list[str]] = {}
+    external: dict[str, list[str]] = {}
+    sizes: dict[str, dict] = {}
     covered: set[str] = set()
     for s in slices:
         sid = s["id"]
@@ -251,6 +345,28 @@ def check(doc: dict) -> dict:
             warn("no-scope", "slice has no scope items", sid)
         if len(scope) > MAX_SCOPE:
             err("too-much-scope", f"{len(scope)} scope items (max {MAX_SCOPE}); split the slice", sid)
+        for n, item in enumerate(scope, 1):
+            problem = packed_problem(str(item))
+            if problem:
+                warn("packed-item", f"scope item {n} {problem}; split it into separate items or slices",
+                     sid)
+
+        if "context" in s and not isinstance(s["context"], str):
+            err("schema", '"context" must be a string', sid)
+        out_of_scope = s.get("out_of_scope", [])
+        if not isinstance(out_of_scope, list):
+            err("schema", '"out_of_scope" must be a list', sid)
+        elif not [x for x in out_of_scope if str(x).strip()]:
+            warn("no-out-of-scope",
+                 "slice lists no out_of_scope items; name what it will not do", sid)
+
+        files = [f for f in as_list(s.get("files")) if isinstance(f, str) and f.strip()]
+        dirs = sorted({directory_of(f) for f in files})
+        sizes[sid] = {"files": len(files), "directories": len(dirs)}
+        if len(files) > MAX_FILES:
+            warn("many-files",
+                 f"touches {len(files)} files across {len(dirs)} directories "
+                 f"(over {MAX_FILES}); consider splitting", sid)
 
         criteria = [c for c in as_list(s.get("criteria")) if isinstance(c, dict)]
         if not criteria:
@@ -265,8 +381,17 @@ def check(doc: dict) -> dict:
             if cid in seen_c:
                 err("duplicate-id", f"duplicate criterion id {cid}", sid)
             seen_c.add(cid)
-            if not str(c.get("text") or "").strip():
+            ctext = str(c.get("text") or "").strip()
+            if not ctext:
                 err("schema", f"criterion {cid} has no text", sid)
+            packed = packed_problem(ctext)
+            if packed:
+                warn("packed-item", f"criterion {cid} {packed}; split it into separate criteria", sid)
+            prose = PROSE_RE.search(ctext)
+            if prose:
+                warn("prose-criterion",
+                     f'criterion {cid} is about PR prose ("{prose.group(0)}"), which no test can '
+                     f"prove; make it a check or move it to the PR description", sid)
             problem = proof_problem(c.get("proof"))
             if problem:
                 err("weak-proof", f"criterion {cid}: {problem}", sid)
@@ -286,15 +411,20 @@ def check(doc: dict) -> dict:
         for d in as_list(s.get("depends_on")):
             if d == sid:
                 err("self-dependency", "slice depends on itself", sid)
-            elif d not in ids:
-                err("unknown-dependency", f"depends on unknown slice {d}", sid)
-            else:
+            elif d in ids:
                 deps.append(d)
+            elif isinstance(d, str) and EXTERNAL_DEP_RE.match(d.strip()):
+                external.setdefault(sid, []).append(d.strip())
+            else:
+                err("unknown-dependency",
+                    f"depends on unknown slice {d} (external issues look like #12, "
+                    f"owner/repo#12, or ABC-12)", sid)
         graph[sid] = deps
 
     for pc in parent_ids:
         if pc not in covered:
-            err("uncovered", f"parent criterion {pc} is not covered by any slice")
+            err("uncovered", f"parent criterion {pc} is not covered by any slice; cover it, "
+                f"or move it to parent.dropped with a reason")
 
     cycles = find_cycles(ids, graph)
     for cyc in cycles:
@@ -307,7 +437,8 @@ def check(doc: dict) -> dict:
             if b["id"] in reach[a["id"]] or a["id"] in reach[b["id"]]:
                 continue
             shared = sorted({fa for fa in as_list(a.get("files")) for fb in as_list(b.get("files"))
-                             if isinstance(fa, str) and isinstance(fb, str) and files_overlap(fa, fb)})
+                             if isinstance(fa, str) and isinstance(fb, str) and files_overlap(fa, fb)
+                             and not (is_shared(fa, shared_files) and is_shared(fb, shared_files))})
             if shared:
                 overlaps.append({"slices": [a["id"], b["id"]], "files": shared})
 
@@ -319,6 +450,9 @@ def check(doc: dict) -> dict:
         "cycles": cycles,
         "layers": order_layers,
         "order": [sid for layer in order_layers for sid in layer],
+        "external_dependencies": external,
+        "sizes": sizes,
+        "dropped": dropped,
         "slice_count": len(slices),
     }
 
@@ -327,7 +461,8 @@ def apply_overlap_policy(result: dict, policy: str) -> None:
     for ov in result["overlaps"]:
         a, b = ov["slices"]
         msg = (f"{a} and {b} are independent but both touch {', '.join(ov['files'])}; "
-               f"add a dependency to serialize them or merge them")
+               f"add a dependency to serialize them, merge them, or list an append-only "
+               f"file (e.g. CHANGELOG.md) in shared_files")
         entry = {"code": "file-overlap", "slice": a, "message": msg}
         (result["errors"] if policy == "fail" else result["warnings"]).append(entry)
     result["ok"] = not result["errors"]
@@ -344,10 +479,25 @@ def format_human(result: dict) -> str:
     for w in result["warnings"]:
         where = f"[{w['slice']}] " if w["slice"] else ""
         lines.append(f"  warning {where}{w['message']}")
+    if result["sizes"]:
+        lines.append("size:")
+        for sid, size in result["sizes"].items():
+            nf, nd = size["files"], size["directories"]
+            lines.append(f"  {sid}: touches {nf} file{'s' if nf != 1 else ''} across "
+                         f"{nd} director{'ies' if nd != 1 else 'y'}")
+    if result["dropped"]:
+        lines.append("dropped from the parent (no slice):")
+        for d in result["dropped"]:
+            extra = f" (covered by {d['covered_by']})" if d["covered_by"] else ""
+            lines.append(f"  - {d['text']}: {d['reason'] or 'no reason given'}{extra}")
     if result["layers"]:
+        ext = result["external_dependencies"]
         lines.append("order (slices on one line can run in parallel):")
         for n, layer in enumerate(result["layers"], 1):
             lines.append(f"  {n}. {', '.join(layer)}")
+            for sid in layer:
+                if ext.get(sid):
+                    lines.append(f"     {sid} waits on external {', '.join(ext[sid])}")
     return "\n".join(lines)
 
 

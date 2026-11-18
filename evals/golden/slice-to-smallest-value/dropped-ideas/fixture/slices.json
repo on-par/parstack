@@ -1,0 +1,27 @@
+{
+  "parent": {
+    "id": "P1",
+    "title": "Ideas for note sharing",
+    "criteria": [
+      {"id": "AC1", "text": "User can share a read-only link to a note"}
+    ],
+    "dropped": [
+      {"text": "Share a note by email", "reason": "already shipped", "covered_by": "#40"},
+      {"text": "Real-time co-editing", "reason": "needs a sync service the app does not have"}
+    ]
+  },
+  "slices": [
+    {
+      "id": "S1",
+      "title": "Share a read-only link",
+      "value": "Users can show a note to someone without an account",
+      "scope": ["Share button", "Public read-only note page"],
+      "files": ["src/notes/share.ts", "web/pages/shared.tsx"],
+      "out_of_scope": ["Revoking a link"],
+      "criteria": [
+        {"id": "S1.1", "text": "Opening the link shows the note and no edit controls", "proof": "e2e/share.spec.ts", "covers": ["AC1"]}
+      ],
+      "depends_on": []
+    }
+  ]
+}

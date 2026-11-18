@@ -1,0 +1,7 @@
+{
+  "description": "depends_on mixes a slice id with external #N, owner/repo#N and ABC-12 refs: pass, run order says which slice waits on them",
+  "script": "check_slices.py",
+  "args": ["slices.json"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

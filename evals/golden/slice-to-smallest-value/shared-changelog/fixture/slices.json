@@ -1,0 +1,37 @@
+{
+  "parent": {
+    "id": "P1",
+    "title": "Organize notes",
+    "criteria": [
+      {"id": "AC1", "text": "User can pin a note to the top of the list"},
+      {"id": "AC2", "text": "User can archive a note"}
+    ]
+  },
+  "shared_files": ["CHANGELOG.md"],
+  "slices": [
+    {
+      "id": "S1",
+      "title": "Pin a note",
+      "value": "Users keep their most-used note in reach",
+      "scope": ["Pin toggle on a note", "Pinned notes sort first"],
+      "files": ["src/notes/pin.ts", "web/components/PinButton.tsx", "CHANGELOG.md"],
+      "out_of_scope": ["Pinning more than one note"],
+      "criteria": [
+        {"id": "S1.1", "text": "A pinned note is listed first", "proof": "tests/notes/pin.test.ts::sorts pinned first", "covers": ["AC1"]}
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "S2",
+      "title": "Archive a note",
+      "value": "Users clear old notes without deleting them",
+      "scope": ["Archive action", "Archived notes hidden from the list"],
+      "files": ["src/notes/archive.ts", "web/components/ArchiveButton.tsx", "CHANGELOG.md"],
+      "out_of_scope": ["An archive view"],
+      "criteria": [
+        {"id": "S2.1", "text": "An archived note no longer appears in the list", "proof": "test_archived_note_hidden", "covers": ["AC2"]}
+      ],
+      "depends_on": []
+    }
+  ]
+}

@@ -1,12 +1,14 @@
 {
   "cycles": [],
+  "dropped": [],
   "errors": [
     {
       "code": "file-overlap",
-      "message": "S1 and S2 are independent but both touch src/orders/query.ts; add a dependency to serialize them or merge them",
+      "message": "S1 and S2 are independent but both touch src/orders/query.ts; add a dependency to serialize them, merge them, or list an append-only file (e.g. CHANGELOG.md) in shared_files",
       "slice": "S1"
     }
   ],
+  "external_dependencies": {},
   "layers": [
     [
       "S1",
@@ -29,6 +31,16 @@
       ]
     }
   ],
+  "sizes": {
+    "S1": {
+      "directories": 2,
+      "files": 2
+    },
+    "S2": {
+      "directories": 2,
+      "files": 2
+    }
+  },
   "slice_count": 2,
   "warnings": []
 }

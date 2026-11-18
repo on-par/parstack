@@ -6,7 +6,7 @@ Based on On PAR's factory method.
 
 ## Skills
 
-### Get a codebase factory-ready
+### Get a codebase agent-ready
 
 - `assess-agent-readiness` - score a repo 0-100 on verify command, boundaries, dead code, duplication, secrets, agent context, CI, and tests; print a ranked fix list.
 - `add-one-verify-command` - detect the stack and write one `verify` entry point chaining build, lint, and test; prove it catches a planted break.

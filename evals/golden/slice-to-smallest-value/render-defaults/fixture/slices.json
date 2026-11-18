@@ -1,0 +1,40 @@
+{
+  "parent": {
+    "id": "P1",
+    "title": "Reset a forgotten password in the notes app",
+    "criteria": [
+      {"id": "AC1", "text": "User can request a reset link by email"},
+      {"id": "AC2", "text": "Reset links expire after one hour"}
+    ],
+    "dropped": [
+      {"text": "Reset by SMS", "reason": "the app has no SMS provider", "covered_by": "#40"}
+    ]
+  },
+  "slices": [
+    {
+      "id": "S1",
+      "title": "Request a reset link",
+      "value": "A locked-out user can get back to their notes",
+      "context": "Tokens are stored in the existing sessions table; mail goes through src/mail/send.ts.",
+      "scope": ["Reset request form", "Email with a one-time link"],
+      "files": ["src/auth/reset.ts", "web/pages/reset.tsx"],
+      "out_of_scope": ["Link expiry", "Rate limiting"],
+      "criteria": [
+        {"id": "S1.1", "text": "Submitting a known email sends one link", "proof": "tests/reset.test.ts::sends link", "covers": ["AC1"]}
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "S2",
+      "title": "Expire reset links",
+      "value": "An old reset email cannot be used to take over an account",
+      "scope": ["Store issued-at on the token", "Reject tokens older than 60 minutes"],
+      "files": ["src/auth/expiry.ts"],
+      "out_of_scope": [],
+      "criteria": [
+        {"id": "S2.1", "text": "A 61-minute-old link is rejected with a clear message", "proof": "test_expired_token", "covers": ["AC2"]}
+      ],
+      "depends_on": ["S1", "#40", "acme/api#7"]
+    }
+  ]
+}

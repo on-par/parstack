@@ -1,0 +1,7 @@
+{
+  "description": "parent.dropped records ideas left out on purpose, with a reason and what covers them; the checker prints them",
+  "script": "check_slices.py",
+  "args": ["slices.json"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

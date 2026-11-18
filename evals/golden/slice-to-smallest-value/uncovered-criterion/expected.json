@@ -1,12 +1,14 @@
 {
   "cycles": [],
+  "dropped": [],
   "errors": [
     {
       "code": "uncovered",
-      "message": "parent criterion AC3 is not covered by any slice",
+      "message": "parent criterion AC3 is not covered by any slice; cover it, or move it to parent.dropped with a reason",
       "slice": null
     }
   ],
+  "external_dependencies": {},
   "layers": [
     [
       "S1"
@@ -21,6 +23,16 @@
     "S2"
   ],
   "overlaps": [],
+  "sizes": {
+    "S1": {
+      "directories": 1,
+      "files": 1
+    },
+    "S2": {
+      "directories": 1,
+      "files": 1
+    }
+  },
   "slice_count": 2,
   "warnings": []
 }

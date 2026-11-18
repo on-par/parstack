@@ -12,10 +12,10 @@ Turn one ask into a short list of slices. Each slice ships on its own, a user ca
 1. **Vertical, not horizontal.** A slice cuts through every layer it touches (UI, API, logic, storage) and ends in something a user or caller can observe. "Database schema", "backend only", "API layer" are not slices.
 2. **First slice is the thinnest end-to-end path.** One input, one happy path, hard-coded where it is safe to be. Later slices widen it.
 3. **Small.** At most 5 scope items and at most 5 acceptance criteria. Bigger means split.
-4. **Every criterion names its proof.** A test name, a test file, `file::test`, or a command. Never "manual", "works", or empty.
-5. **Dependencies are explicit.** If slice B needs slice A merged first, B lists A in `depends_on`. No hidden ordering.
-6. **Independent slices do not share files.** Two slices that can run at the same time must not touch the same file. If they must, add a dependency or merge them.
-7. **Full coverage.** Every acceptance criterion of the parent is covered by at least one slice criterion. Nothing is dropped silently.
+4. **Every criterion names its proof.** A test name, a test file, `file::test`, or a backticked command. Never "manual", "works", a doc path, or a sentence in the PR body.
+5. **Dependencies are explicit.** If slice B needs slice A merged first, B lists A in `depends_on`. Open issues outside the slice set go there too (`#40`, `owner/repo#7`, `PROJ-12`). No hidden ordering.
+6. **Independent slices do not share files.** Two slices that can run at the same time must not touch the same file. If they must, add a dependency or merge them. Append-only files (a changelog) go in `shared_files`.
+7. **Full coverage.** Every acceptance criterion of the parent is covered by at least one slice criterion. An idea you leave out goes in `parent.dropped` with a reason. Nothing is dropped silently.
 
 ## Procedure
 
@@ -25,7 +25,7 @@ Turn one ask into a short list of slices. Each slice ships on its own, a user ca
 4. For each slice, list the files you expect to touch. Read the code to get this right; guesses here cause merge collisions later.
 5. Write the slice document (schema below) to a file, e.g. `slices.json`, or a markdown file with one fenced `json` block.
 6. Run the checker. Fix every error. Re-run until it passes.
-7. Optionally render issue bodies and create the issues. Creating issues is outward-facing: confirm with the user first.
+7. Optionally render issue bodies and create the issues. Creating issues is outward-facing: confirm with the user first unless they already asked you to file them.
 
 ## Splitting moves
 
@@ -48,8 +48,10 @@ Setup work (a migration, a config flag) is folded into the first slice that need
   "parent": {
     "id": "P1",
     "title": "Users can reset a forgotten password",
-    "criteria": [{"id": "AC1", "text": "User can request a reset link by email"}]
+    "criteria": [{"id": "AC1", "text": "User can request a reset link by email"}],
+    "dropped": [{"text": "Reset by SMS", "reason": "no SMS provider", "covered_by": "#40"}]
   },
+  "shared_files": ["CHANGELOG.md"],
   "slices": [
     {
       "id": "S1",
@@ -57,6 +59,8 @@ Setup work (a migration, a config flag) is folded into the first slice that need
       "value": "A locked-out user gets back in without support",
       "scope": ["Reset request form", "Email with token link"],
       "files": ["src/auth/reset.ts", "web/pages/reset.tsx"],
+      "out_of_scope": ["Link expiry", "Rate limiting"],
+      "context": "Tokens live in the existing sessions table.",
       "criteria": [
         {"id": "S1.1", "text": "Submitting a known email sends one link",
          "proof": "tests/auth/reset.test.ts::sends link for known email",
@@ -70,8 +74,12 @@ Setup work (a migration, a config flag) is folded into the first slice that need
 
 - `value`: one sentence, from the user's side. Required.
 - `files`: paths, directories ending in `/`, or globs. Used for the overlap check.
+- `out_of_scope`: what this slice will not do. Write real items; an empty list is a warning, and render prints no placeholder.
+- `context`: optional background for whoever picks up the issue.
 - `covers`: parent criterion ids this slice criterion satisfies.
-- `depends_on`: slice ids that must merge first.
+- `depends_on`: slice ids that must merge first, or external issues (`#40`, `owner/repo#7`, `PROJ-12`).
+- `shared_files`: append-only files (changelog, release notes) that independent slices may both touch.
+- `parent.dropped`: ideas from the ask that get no slice, each with `text`, `reason`, and optional `covered_by`.
 
 ## Check
 
@@ -80,30 +88,32 @@ python3 "${CLAUDE_SKILL_DIR}/scripts/check_slices.py" slices.json
 python3 "${CLAUDE_SKILL_DIR}/scripts/check_slices.py" slices.md --json
 ```
 
-Errors (exit 1): more than 5 scope items or criteria, missing value or criteria, weak or missing proof, uncovered or unknown parent criterion, unknown or self dependency, dependency cycle, duplicate ids, independent slices sharing a file.
+Errors (exit 1): more than 5 scope items or criteria, missing value or criteria, weak or missing proof, uncovered or unknown parent criterion, unknown or self dependency, dependency cycle, duplicate ids, independent slices sharing a file, dropped idea without a reason.
 
-Warnings: title names a layer instead of value, slice covers no parent criterion, no scope items, parent has no criteria.
+Warnings: title names a layer instead of value, slice covers no parent criterion, no scope items, no `out_of_scope` items, more than 10 files, a scope item or criterion over 200 characters or joined with `;`, a criterion about PR prose, parent has no criteria.
 
 Options: `--overlap warn` downgrades file overlap to a warning (use only when slices will run one at a time). `--strict` fails on warnings.
 
-On pass it prints the run order as layers. Slices in one layer can run in parallel.
+It prints "touches N files across M directories" per slice, any dropped ideas, and the run order as layers. Slices in one layer can run in parallel; a slice with external dependencies is marked "waits on external #40". External ids are not part of the cycle or overlap checks.
 
 How to fix common errors:
 
 - `too-many-criteria` / `too-much-scope`: split with a move above. Do not merge criteria into one long sentence to dodge the limit.
-- `weak-proof`: name the test you will write (`test_expired_token_rejected`) or the command that proves it (`` `npm test -- reset` ``).
-- `file-overlap`: if one slice really builds on the other, add `depends_on`. If they are the same change, merge them. Otherwise split the shared file's change into the earlier slice.
-- `uncovered`: add a slice or a criterion, or confirm with the user the parent criterion is dropped and remove it from the parent.
+- `many-files` / `packed-item` warnings: the slice is probably two. Split it, or confirm it is one change.
+- `weak-proof`: name the test you will write (`test_expired_token_rejected`, `tests/reset.test.ts::expires`) or the command that proves it (`` `npm test -- reset` ``). A plain path counts only if it is a test file.
+- `prose-criterion` warning: "the PR body records X" is not testable. Turn it into a check, or keep it out of the criteria.
+- `file-overlap`: if one slice really builds on the other, add `depends_on`. If they are the same change, merge them. If the file is append-only (`CHANGELOG.md`), list it in `shared_files`. Otherwise split the shared file's change into the earlier slice.
+- `uncovered`: add a slice or a criterion, or confirm with the user the parent criterion is dropped, remove it from the parent criteria, and record it in `parent.dropped`.
 - `horizontal` warning: re-cut so the slice ends in observable behavior.
 
 ## Render
 
 ```
 python3 "${CLAUDE_SKILL_DIR}/scripts/render.py" slices.json
-python3 "${CLAUDE_SKILL_DIR}/scripts/render.py" slices.json --json --issue-map S1=41,S2=42
+python3 "${CLAUDE_SKILL_DIR}/scripts/render.py" slices.json --json --issue-map S1=41,S2=42 --parent-issue 40
 ```
 
-Prints one markdown issue body per slice in run order, with Value, Scope, Files, Acceptance criteria (each with its proof), Out of scope, and Dependencies. `--issue-map` rewrites slice ids to `#N` so "Depends on #41" links the real issues. Output goes to stdout only; nothing is posted.
+Prints one markdown issue body per slice in run order, with Value, Context, Scope, Files, Acceptance criteria (each with its proof), Out of scope (only when listed), and Dependencies. External dependencies print as written. `--issue-map` rewrites slice ids to `#N` so "Depends on #41" links the real issues. `--parent-issue N` adds "Part of #N". `--show-covers` adds the parent criteria each criterion covers. Dropped ideas get no issue. Output goes to stdout only; nothing is posted.
 
 ## Judgment that stays with you
 

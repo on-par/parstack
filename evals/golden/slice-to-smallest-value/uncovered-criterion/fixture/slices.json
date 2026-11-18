@@ -15,6 +15,7 @@
       "value": "Users do not lose what they picked",
       "scope": ["Persist cart per user", "Load cart on sign-in"],
       "files": ["src/cart/store.ts"],
+      "out_of_scope": ["Saved carts on other devices"],
       "criteria": [
         {"id": "S1.1", "text": "Cart items are back after logout and login", "proof": "test_cart_persists_across_sessions", "covers": ["AC1"]}
       ],
@@ -26,6 +27,7 @@
       "value": "Items added before sign-in are kept",
       "scope": ["Merge guest and saved carts"],
       "files": ["src/cart/merge.ts"],
+      "out_of_scope": ["Merging quantities above stock"],
       "criteria": [
         {"id": "S2.1", "text": "Guest items appear in the saved cart after sign-in", "proof": "test_guest_cart_merges", "covers": ["AC2"]}
       ],
