@@ -1,0 +1,7 @@
+{
+  "description": "after #N, builds on, Related: lines, a Related section and Dependencies: None. make no edges; depends on / blocked by / requires and Dependencies bullets do",
+  "script": "order_queue.py",
+  "args": ["--file", "issues.json", "--now", "2026-11-17T00:00:00Z", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

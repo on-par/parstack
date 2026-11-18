@@ -18,12 +18,33 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-REF = r"(?:[\w.-]+/[\w.-]+)?#\d+"
-DEP_RE = re.compile(
-    rf"\b(?:depends on|depend on|dependent on|blocked by|blocked on|requires|after)\s*:?\s*"
-    rf"({REF}(?:\s*(?:,|and|&)\s*{REF})*)",
-    re.IGNORECASE,
-)
+# Body dependency rules mirror check-issue-readiness (each skill is self-contained,
+# so they are copied, not imported; tests/test_dependency_parity.py keeps them in step).
+# Only explicit verbs make a dependency; "after", "builds on", "related" do not.
+REF = r"(?:[\w.-]+/[\w.-]+)?#\d+|\b[A-Z][A-Z0-9]+-\d+\b"
+# Slice ids (S1) and tracker keys (ABC-12) keep a list going but are not ordered here.
+SLICE_ID = r"\b[A-Z][A-Za-z]{0,4}\d+(?:\.\d+)?\b"
+DEP_TOKEN = rf"(?:{REF}|{SLICE_ID})"
+DEP_LIST = rf"({DEP_TOKEN}(?:\s*(?:,|(?i:and)|&)\s*{DEP_TOKEN})*)"
+DEP_RE = re.compile(r"(?i:\b(depends on|dependent on|blocked by|blocked on|requires))\s*:?\s*"
+                    + DEP_LIST)
+BARE_REF_RE = re.compile(rf"^\s*((?:{REF})(?:\s*(?:,|and|&)\s*(?:{REF}))*)")
+NOT_DEP_RE = re.compile(r"\b(?:related|see also|builds on|follow-?up|duplicate)\b", re.IGNORECASE)
+# Heading kinds in check-issue-readiness order; earlier kinds win, so "Acceptance
+# criteria and dependencies" is not a Dependencies section. Only the last two matter here.
+SECTION_KINDS = [
+    ("out_of_scope", r"out of scope|non-goals?|not in scope|excluded|won'?t do"),
+    ("open_questions", r"open questions?|unknowns|questions"),
+    ("assumptions", r"assumptions?"),
+    ("acceptance", r"acceptance|done when|definition of done|success criteria|criteria|"
+                   r"expected behaviou?r|requirements"),
+    ("dependencies", r"dependenc|depends on|blocked by|prerequisite|blockers"),
+    ("related", r"related|see also|references|links"),
+]
+ATX_RE = re.compile(r"^\s{0,3}#{1,6}\s+(.*?)\s*#*\s*$")
+BOLD_RE = re.compile(r"^\s*\*\*(.+?)\*\*:?\s*$")
+LABEL_RE = re.compile(r"^\s*([A-Z][A-Za-z /'-]{2,40}):\s*$")
+ITEM_RE = re.compile(r"^\s*(?:[-*+]|\d+[.)])\s+(?:\[[ xX]\]\s+)?(.*\S)\s*$")
 REF_RE = re.compile(r"(?:([\w.-]+/[\w.-]+))?#(\d+)")
 DEP_LABEL_RE = re.compile(r"^(?:depends[- _]?on|blocked[- _]?by|after)[\s:/#_-]*#?(\d+)$", re.IGNORECASE)
 MD_ITEM_RE = re.compile(r"^[-*+]\s+(?:\[([ xX])\]\s+)?#(\d+)\b[:.)-]?\s*(.*)$")
@@ -152,18 +173,68 @@ def strip_code(text: str) -> str:
     return re.sub(r"`[^`\n]*`", "", text)
 
 
+def classify(heading: str) -> str:
+    h = heading.lower()
+    for kind, pattern in SECTION_KINDS:
+        if re.search(pattern, h):
+            return kind
+    return "other"
+
+
+def split_sections(body: str) -> list[dict]:
+    sections = [{"heading": "", "kind": "other", "lines": []}]
+    for line in body.splitlines():
+        m = ATX_RE.match(line) or BOLD_RE.match(line) or LABEL_RE.match(line)
+        if m:
+            heading = m.group(1).strip().strip("*").strip()
+            sections.append({"heading": heading, "kind": classify(heading), "lines": []})
+        else:
+            sections[-1]["lines"].append(line)
+    return sections
+
+
+def body_refs(body: str) -> list[str]:
+    """Dependency refs in a body, in the order check-issue-readiness finds them.
+
+    Outside a Related section, a ref counts only after an explicit verb (depends on,
+    blocked by, blocked on, requires). Inside a Dependencies section, a line that
+    starts with a ref counts too, unless it says the ref is only related.
+    """
+    refs: list[str] = []
+    for s in split_sections(strip_code(body)):
+        if s["kind"] == "related":
+            continue
+        for m in DEP_RE.finditer("\n".join([s["heading"]] + s["lines"])):
+            for token in re.split(r"\s*(?:,|&|\band\b)\s*", m.group(2), flags=re.IGNORECASE):
+                if re.fullmatch(REF, token) and token not in refs:
+                    refs.append(token)
+        if s["kind"] != "dependencies":
+            continue
+        for line in s["lines"]:
+            m = ITEM_RE.match(line)
+            text = (m.group(1) if m else line).strip()
+            bare = BARE_REF_RE.match(text)
+            if bare and not NOT_DEP_RE.search(text):
+                for ref in re.findall(REF, bare.group(1)):
+                    if ref not in refs:
+                        refs.append(ref)
+    return refs
+
+
 def parse_deps(issue: dict) -> tuple[list[int], list[str]]:
     """Return (local issue numbers, external refs) this issue depends on."""
     local: list[int] = []
     external: list[str] = []
-    for m in DEP_RE.finditer(strip_code(issue["body"])):
-        for repo, num in REF_RE.findall(m.group(1)):
-            if repo:
-                ref = f"{repo}#{num}"
-                if ref not in external:
-                    external.append(ref)
-            elif int(num) not in local:
-                local.append(int(num))
+    for token in body_refs(issue["body"]):
+        m = REF_RE.fullmatch(token)
+        if not m:
+            continue  # tracker key such as ABC-12: not an issue in this list
+        repo, num = m.groups()
+        if repo:
+            if token not in external:
+                external.append(token)
+        elif int(num) not in local:
+            local.append(int(num))
     for lab in issue["labels"]:
         lm = DEP_LABEL_RE.match(lab)
         if lm and int(lm.group(1)) not in local:

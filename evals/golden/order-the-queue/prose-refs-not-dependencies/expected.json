@@ -1,0 +1,55 @@
+{
+  "blocked": [],
+  "counts": {
+    "blocked": 0,
+    "groups": 4,
+    "open": 6,
+    "runnable": 6
+  },
+  "cycles": [],
+  "layers": [
+    [
+      {
+        "number": 12,
+        "title": "Session store"
+      },
+      {
+        "number": 33,
+        "title": "Rotate reset secret"
+      }
+    ],
+    [
+      {
+        "number": 40,
+        "title": "Expire reset links"
+      },
+      {
+        "number": 42,
+        "title": "Reset rate limit"
+      }
+    ],
+    [
+      {
+        "number": 41,
+        "title": "Reset link audit log"
+      }
+    ],
+    [
+      {
+        "number": 43,
+        "title": "Reset email copy"
+      }
+    ]
+  ],
+  "missing": [],
+  "order": [
+    12,
+    33,
+    40,
+    42,
+    41,
+    43
+  ],
+  "stale": [],
+  "stale_days": 30
+}
