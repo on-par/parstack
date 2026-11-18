@@ -1,0 +1,24 @@
+{
+  "parent": {
+    "id": "P1",
+    "title": "Reset a forgotten password in the notes app",
+    "criteria": [
+      {"id": "AC1", "text": "User can request a reset link by email"}
+    ]
+  },
+  "slices": [
+    {
+      "id": "S1",
+      "title": "Request a reset link",
+      "value": "A locked-out user can get back to their notes",
+      "context": "Which mail provider sends the link is TBD.",
+      "scope": ["Reset request form", "Email with a one-time link"],
+      "files": ["src/auth/reset.ts"],
+      "out_of_scope": ["Link expiry"],
+      "criteria": [
+        {"id": "S1.1", "text": "Submitting a known email sends one link", "proof": "tests/reset.test.ts::sends link", "covers": ["AC1"]}
+      ],
+      "depends_on": []
+    }
+  ]
+}

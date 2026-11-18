@@ -1,0 +1,7 @@
+{
+  "description": "file_slices dry run where check_slices passes but the rendered body has a TBD: readiness says not-ready, exit 1, nothing posted",
+  "script": "file_slices.py",
+  "args": ["slices.json", "--repo", "acme/notes-app"],
+  "cwd": "fixture",
+  "expect_exit": 1
+}

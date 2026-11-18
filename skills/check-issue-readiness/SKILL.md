@@ -30,7 +30,7 @@ Add `--json` for machine output. `--strict` makes ready-with-assumptions exit 1 
 - `--gh` needs the `gh` CLI. If it is missing the script prints `skipped: gh not found` and exits 2. Fall back to `gh`-free input: paste the issue into a markdown file and use `--file`.
 - `--file`: the first `# heading` is the title. `gh issue create --body-file` posts the whole file, title line included. Use `--emit-body` to print the body without the title line (the verdict goes to stderr, and the exit code is the usual one):
   `check_issue.py --file issue.md --emit-body > body.md && gh issue create --title "..." --body-file body.md`
-- Issues rendered by `slice-to-smallest-value` name dependencies as slice ids (`Depends on S1`). Those are reported as unresolved dependencies. File the earlier slices first, re-render with `--issue-map S1=41,...`, then check readiness.
+- Issues rendered by `slice-to-smallest-value` name dependencies as slice ids (`Depends on S1`). Those are reported as unresolved dependencies. To file a slice set, use its `file_slices.py --repo owner/name` (dry run by default; `--create` posts). It files slices in dependency order, rewrites slice ids to the new issue numbers, runs this check on each body before posting and refuses a not-ready one, then re-checks each new issue with `--gh N`.
 - `--json-file`: accepts `title`/`body` (GitHub), `title`/`description` (Linear), or `fields.summary`/`fields.description` (Jira, including rich-text documents).
 
 Exit codes: 0 ready or ready-with-assumptions, 1 not-ready, 2 input error or skipped.

@@ -1,0 +1,33 @@
+PASS: 1 slices, 0 errors, 0 warnings
+dry run: 1 issue for acme/notes-app, in this order; nothing is posted (add --create to file them)
+
+[1/1] S1
+title: Request a reset link
+labels: (none)
+readiness: not-ready
+  missing: unresolved markers: TBD
+body:
+## Value
+A locked-out user can get back to their notes
+
+## Context
+Which mail provider sends the link is TBD.
+
+## Scope
+- Reset request form
+- Email with a one-time link
+
+## Files
+- `src/auth/reset.ts`
+
+## Acceptance criteria
+- [ ] Submitting a known email sends one link
+  - proof: tests/reset.test.ts::sends link
+
+## Out of scope
+- Link expiry
+
+## Dependencies
+- None
+
+would refuse: S1 not ready

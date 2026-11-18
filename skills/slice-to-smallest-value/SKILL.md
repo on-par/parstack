@@ -25,7 +25,7 @@ Turn one ask into a short list of slices. Each slice ships on its own, a user ca
 4. For each slice, list the files you expect to touch. Read the code to get this right; guesses here cause merge collisions later.
 5. Write the slice document (schema below) to a file, e.g. `slices.json`, or a markdown file with one fenced `json` block.
 6. Run the checker. Fix every error. Re-run until it passes.
-7. Optionally render issue bodies and create the issues. Creating issues is outward-facing: confirm with the user first unless they already asked you to file them.
+7. Optionally file the slices as issues with `file_slices.py` (see File). Creating issues is outward-facing: show the dry run and confirm with the user first unless they already asked you to file them.
 
 ## Splitting moves
 
@@ -114,6 +114,20 @@ python3 "${CLAUDE_SKILL_DIR}/scripts/render.py" slices.json --json --issue-map S
 ```
 
 Prints one markdown issue body per slice in run order, with Value, Context, Scope, Files, Acceptance criteria (each with its proof), Out of scope (only when listed), and Dependencies. External dependencies print as written. `--issue-map` rewrites slice ids to `#N` so "Depends on #41" links the real issues. `--parent-issue N` adds "Part of #N". `--show-covers` adds the parent criteria each criterion covers. Dropped ideas get no issue. Output goes to stdout only; nothing is posted.
+
+## File
+
+```
+python3 "${CLAUDE_SKILL_DIR}/scripts/file_slices.py" slices.json --repo owner/name [--label L ...] [--parent-issue 40]
+python3 "${CLAUDE_SKILL_DIR}/scripts/file_slices.py" slices.json --repo owner/name --create
+```
+
+Use this instead of filing rendered bodies by hand. It runs the checker first and stops on errors.
+
+- **Dry run (default):** prints each issue in run order: title (the slice title), labels, readiness verdict, and body. A dependency on a slice that is not filed yet shows as `S1 (not created yet)`. Nothing is posted. Exit 1 if any body is not ready.
+- **`--create`:** creating issues is outward-facing; confirm first. Needs `gh` (without it: `skipped: gh not found`, exit 2). It checks every body with check-issue-readiness and refuses before posting anything if one is not ready. It then creates one issue at a time with `gh issue create --repo ... --body-file ...`. Each body is rendered with the numbers created so far, so "Depends on #41" points at the real issue, and is checked again just before it is posted. Each new issue is re-checked with `check_issue.py --gh N`. The body never repeats the title. External dependencies print as written.
+- **Map and resume:** after each create, slice id -> number and URL go to `--map-out` (default `slices.issues.json` next to the slices file). If a run stops (a not-ready body, a failed create), it lists what was already created. Re-run with `--create --resume` to skip those and finish without duplicates. `--create` without `--resume` refuses to start when the map already lists issues.
+- Labels come only from `--label`. `--json` prints the plan and results.
 
 ## Judgment that stays with you
 
