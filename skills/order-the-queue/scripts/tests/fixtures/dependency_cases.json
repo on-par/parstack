@@ -1,0 +1,19 @@
+[
+  {"name": "after is timing, not a dependency", "body": "The reset email test fails after #33 lands, so run it last.", "refs": []},
+  {"name": "builds on merged work", "body": "Builds on merged #12.", "refs": []},
+  {"name": "related line", "body": "Related: #40, #41", "refs": []},
+  {"name": "related section", "body": "## Related\n- #40 Expire reset links\n- Depends on #50 for the old token schema (already shipped)\n- #51", "refs": []},
+  {"name": "dependencies none", "body": "Dependencies: None.", "refs": []},
+  {"name": "dependencies none with prose", "body": "## Dependencies\nDependencies: None. Builds on merged #12. Related: #40, #41", "refs": []},
+  {"name": "dependencies section says related", "body": "## Dependencies\n- #17 related, not blocking", "refs": []},
+  {"name": "fenced code", "body": "```\ndepends on #77\n```", "refs": []},
+  {"name": "depends on", "body": "Depends on #12", "refs": ["#12"]},
+  {"name": "blocked by", "body": "Blocked by #13.", "refs": ["#13"]},
+  {"name": "requires", "body": "Requires #14", "refs": ["#14"]},
+  {"name": "blocked on", "body": "Blocked on #18 until the schema lands.", "refs": ["#18"]},
+  {"name": "list after a verb", "body": "Depends on #2, #3 and #4; fails after #5.", "refs": ["#2", "#3", "#4"]},
+  {"name": "slice id keeps the list going", "body": "Depends on S1 and #19", "refs": ["#19"]},
+  {"name": "bullets in a dependencies section", "body": "## Dependencies\n- #15 Expire reset links\n- #16", "refs": ["#15", "#16"]},
+  {"name": "external ref", "body": "Depends on other/notes-api#3", "refs": ["other/notes-api#3"]},
+  {"name": "mixed issue", "body": "## Context\nReset links never expire. The test fails after #33 lands.\n\n## Dependencies\n- Blocked by #12\n- #20 Session store\n\n## Related\n- #40\n- Depends on #50", "refs": ["#12", "#20"]}
+]

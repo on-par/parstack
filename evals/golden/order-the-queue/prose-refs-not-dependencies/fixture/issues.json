@@ -1,0 +1,8 @@
+[
+  {"number": 12, "title": "Session store", "body": "Dependencies: None.", "labels": [], "updatedAt": "2026-11-10T00:00:00Z", "state": "OPEN"},
+  {"number": 33, "title": "Rotate reset secret", "body": "Builds on merged #12.\nRelated: #40, #41", "labels": [], "updatedAt": "2026-11-10T00:00:00Z", "state": "OPEN"},
+  {"number": 40, "title": "Expire reset links", "body": "## Context\nThe reset email test fails after #33 lands, so run it last.\n\n## Dependencies\n- Blocked by #12\n\n## Related\n- #41\n- Depends on #50 for the old token schema (already shipped)", "labels": [], "updatedAt": "2026-11-10T00:00:00Z", "state": "OPEN"},
+  {"number": 41, "title": "Reset link audit log", "body": "## Dependencies\n- #40 Expire reset links", "labels": [], "updatedAt": "2026-11-10T00:00:00Z", "state": "OPEN"},
+  {"number": 42, "title": "Reset rate limit", "body": "Requires #33", "labels": [], "updatedAt": "2026-11-10T00:00:00Z", "state": "OPEN"},
+  {"number": 43, "title": "Reset email copy", "body": "Depends on #41", "labels": [], "updatedAt": "2026-11-10T00:00:00Z", "state": "OPEN"}
+]

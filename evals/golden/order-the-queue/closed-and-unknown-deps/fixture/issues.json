@@ -1,6 +1,6 @@
 [
   {"number": 20, "title": "Billing hook", "body": "Requires #99", "labels": [], "updatedAt": "2026-11-10T00:00:00Z", "state": "OPEN"},
-  {"number": 21, "title": "Invoice email", "body": "after #20", "labels": [], "updatedAt": "2026-11-10T00:00:00Z", "state": "OPEN"},
+  {"number": 21, "title": "Invoice email", "body": "Blocked by #20", "labels": [], "updatedAt": "2026-11-10T00:00:00Z", "state": "OPEN"},
   {"number": 22, "title": "Uses finished work", "body": "Depends on #50", "labels": [], "updatedAt": "2026-11-10T00:00:00Z", "state": "OPEN"},
   {"number": 50, "title": "Done already", "body": "", "labels": [], "updatedAt": "2026-10-01T00:00:00Z", "state": "CLOSED"}
 ]
