@@ -10,9 +10,9 @@ An issue is ready when someone with no extra context can finish it and prove it 
 ## What ready means
 
 - **Acceptance criteria:** a list of observable outcomes, under a heading like "Acceptance criteria", "Done when", or as a checkbox list.
-- **Proof per criterion:** each criterion names a test, check, or command (`proof: test_rejects_expired_token`, `` `npm test -- reset` ``). "Manual" is not proof.
+- **Proof per criterion:** each criterion names a test, check, or command on a `proof:` / `test:` / `cmd:` line, inline or as a child bullet (`proof: test_rejects_expired_token`, `` proof: `npm test -- reset` ``). "Manual" is not proof. A backticked word in the criterion text itself (`` `syncMode: strict` is honored ``) is the outcome, not its proof.
 - **Scope and out of scope:** what changes, and what explicitly does not.
-- **Dependencies:** "Depends on #N", "Blocked by #N", or "Dependencies: None".
+- **Dependencies:** "Depends on #N", "Blocked by #N", "Requires #N", a bare `#N` bullet in a Dependencies section, or "Dependencies: None". Other refs ("builds on #N", "Related: #N", "after #N") are not dependencies. Put related issues in a separate `## Related` section; it is never read as dependencies.
 - **Small:** at most 5 criteria and at most 5 scope items. Bigger issues get sliced.
 - **Resolved:** no TBD, TODO, `??`, or open questions left in the text, and no `blocked` / `needs-info` / `question` label.
 - **Precise:** criteria avoid vague words (fast, properly, intuitive, robust, better, etc).
@@ -28,7 +28,9 @@ python3 "${CLAUDE_SKILL_DIR}/scripts/check_issue.py" --json-file issue.json
 Add `--json` for machine output. `--strict` makes ready-with-assumptions exit 1 (use in unattended loops that must not guess). `--max-items N` changes the size limit (default 5).
 
 - `--gh` needs the `gh` CLI. If it is missing the script prints `skipped: gh not found` and exits 2. Fall back to `gh`-free input: paste the issue into a markdown file and use `--file`.
-- `--file`: the first `# heading` is the title.
+- `--file`: the first `# heading` is the title. `gh issue create --body-file` posts the whole file, title line included. Use `--emit-body` to print the body without the title line (the verdict goes to stderr, and the exit code is the usual one):
+  `check_issue.py --file issue.md --emit-body > body.md && gh issue create --title "..." --body-file body.md`
+- Issues rendered by `slice-to-smallest-value` name dependencies as slice ids (`Depends on S1`). Those are reported as unresolved dependencies. File the earlier slices first, re-render with `--issue-map S1=41,...`, then check readiness.
 - `--json-file`: accepts `title`/`body` (GitHub), `title`/`description` (Linear), or `fields.summary`/`fields.description` (Jira, including rich-text documents).
 
 Exit codes: 0 ready or ready-with-assumptions, 1 not-ready, 2 input error or skipped.
@@ -36,17 +38,19 @@ Exit codes: 0 ready or ready-with-assumptions, 1 not-ready, 2 input error or ski
 ## Verdicts
 
 - **not-ready** (blocking, listed under `missing`): no acceptance criteria; more than 5 criteria or scope items; no proof named for any criterion and no Testing section; unresolved TBD/TODO/`??`; open questions; a blocking label.
-- **ready-with-assumptions** (listed under `assumptions`): some criteria lack proof; no scope or out-of-scope section; no dependency statement; vague wording in a criterion. The script states the assumption it would make for each.
+- **ready-with-assumptions** (listed under `assumptions`): some criteria lack proof; no scope or out-of-scope section; no dependency statement; a dependency that is not an issue reference (`S1`); vague wording in a criterion. The script states the assumption it would make for each.
 - **ready**: nothing missing, nothing assumed.
 
 `notes` lists dependencies to confirm are merged before starting. They do not change the verdict.
+
+An `## Assumptions` section is read and counted (`assumptions_documented` in `--json`, "N documented assumptions" in text). A documented assumption about dependencies replaces the automatic "no dependencies stated" one.
 
 ## What to do with the result
 
 1. **not-ready, too big:** slice it. Split into issues of at most 5 criteria each, each a vertical slice of user-visible value, with explicit dependencies between them.
 2. **not-ready, missing criteria or proof:** draft the missing criteria and a proof for each from the issue text and the code. Present them to the issue owner; do not invent product decisions.
 3. **not-ready, open questions or TBD:** list the questions. Ask the owner. Do not start.
-4. **ready-with-assumptions:** read each assumption. If it is safe, write it into the issue (an Assumptions section) so the next reader sees it, then start. If it is not safe, ask.
+4. **ready-with-assumptions:** read each assumption. If it is safe, write it into the issue (an `## Assumptions` section) so the next reader sees it, then start. If it is not safe, ask.
 5. **ready:** confirm the `notes` dependencies are closed, then start.
 
 Editing or commenting on a remote issue is outward-facing. Show the proposed text and confirm before posting it.
@@ -71,6 +75,9 @@ Editing or commenting on a remote issue is outward-facing. Show the proposed tex
 
 ## Dependencies
 - Depends on #41
+
+## Related
+- #38
 ```
 
 ## Judgment that stays with you

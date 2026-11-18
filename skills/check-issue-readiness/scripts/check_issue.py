@@ -24,9 +24,11 @@ MAX_ITEMS = 5
 SECTION_KINDS = [
     ("out_of_scope", r"out of scope|non-goals?|not in scope|excluded|won'?t do"),
     ("open_questions", r"open questions?|unknowns|questions"),
+    ("assumptions", r"assumptions?"),
     ("acceptance", r"acceptance|done when|definition of done|success criteria|criteria|"
                    r"expected behaviou?r|requirements"),
     ("dependencies", r"dependenc|depends on|blocked by|prerequisite|blockers"),
+    ("related", r"related|see also|references|links"),
     ("proof", r"proof|verification|verify|test plan|testing|how to test"),
     ("scope", r"scope|tasks|changes|implementation|deliverables|what to (?:do|build)"),
 ]
@@ -35,13 +37,17 @@ BOLD_RE = re.compile(r"^\s*\*\*(.+?)\*\*:?\s*$")
 LABEL_RE = re.compile(r"^\s*([A-Z][A-Za-z /'-]{2,40}):\s*$")
 ITEM_RE = re.compile(r"^(\s*)(?:[-*+]|\d+[.)])\s+(?:\[([ xX])\]\s+)?(.*\S)\s*$")
 GWT_RE = re.compile(r"^\s*(?:[-*]\s*)?(?:\*\*)?(Given|Scenario)\b", re.IGNORECASE)
-DEP_RE = re.compile(
-    r"\b(?:depends on|dependent on|blocked by|blocked on|requires|after)\s*:?\s*"
-    r"((?:(?:[\w.-]+/[\w.-]+)?#\d+|[A-Z][A-Z0-9]+-\d+)"
-    r"(?:\s*(?:,|and|&)\s*(?:(?:[\w.-]+/[\w.-]+)?#\d+|[A-Z][A-Z0-9]+-\d+))*)",
-    re.IGNORECASE,
-)
-REF_RE = re.compile(r"(?:[\w.-]+/[\w.-]+)?#\d+|\b[A-Z][A-Z0-9]+-\d+\b")
+REF = r"(?:[\w.-]+/[\w.-]+)?#\d+|\b[A-Z][A-Z0-9]+-\d+\b"
+REF_RE = re.compile(REF)
+# A slice id like S1 or S3.5 names a dependency but is not an issue reference.
+SLICE_ID = r"\b[A-Z][A-Za-z]{0,4}\d+(?:\.\d+)?\b"
+DEP_TOKEN = rf"(?:{REF}|{SLICE_ID})"
+DEP_LIST = rf"({DEP_TOKEN}(?:\s*(?:,|(?i:and)|&)\s*{DEP_TOKEN})*)"
+# Only explicit verbs make a dependency; "after", "builds on", "related" do not.
+DEP_RE = re.compile(r"(?i:\b(depends on|dependent on|blocked by|blocked on|requires))\s*:?\s*"
+                    + DEP_LIST)
+BARE_REF_RE = re.compile(rf"^\s*((?:{REF})(?:\s*(?:,|and|&)\s*(?:{REF}))*)")
+NOT_DEP_RE = re.compile(r"\b(?:related|see also|builds on|follow-?up|duplicate)\b", re.IGNORECASE)
 PROOF_MARKER_RE = re.compile(
     r"\b(?:proof|proven by|proved by|test|tests|verify|verified by|check|cmd|command)\s*:\s*(.*)",
     re.IGNORECASE,
@@ -49,7 +55,11 @@ PROOF_MARKER_RE = re.compile(
 PROOF_TOKEN_RE = re.compile(r"`[^`]+`|\btest_\w+|\w+\.(?:test|spec)\.\w+|\w+::\w+|\w+Tests?\.\w+")
 VAGUE_PROOF_RE = re.compile(r"^(?:manual\w*|by hand|works|tbd|todo|n/?a|none|-|\?)?\.?$", re.IGNORECASE)
 UNRESOLVED_RE = re.compile(r"\bTBD\b|\bTODO\b|\?\?+|\b[Tt]o be (?:decided|determined|confirmed)\b")
-NONE_RE = re.compile(r"^\s*(?:none|n/?a|no dependencies|nothing|-)\.?\s*$", re.IGNORECASE)
+NONE_WORDS = r"^\s*(?:dependenc(?:y|ies)\s*:\s*)?(?:none|n/?a|no dependencies|nothing"
+NONE_RE = re.compile(NONE_WORDS + r"|-)\.?\s*$", re.IGNORECASE)
+# "Dependencies: None. Builds on merged #12." states none, then adds prose.
+NONE_LEAD_RE = re.compile(NONE_WORDS + r")\s*[.;]\s+\S", re.IGNORECASE)
+DOC_DEP_RE = re.compile(r"dependenc|depends on|blocked by|prerequisite", re.IGNORECASE)
 VAGUE_WORDS = [
     "etc", "and so on", "various", "somehow", "appropriate", "appropriately", "as needed",
     "properly", "correctly", "fast", "quickly", "user-friendly", "intuitive", "robust",
@@ -196,19 +206,74 @@ def parse_items(lines: list[str]) -> list[dict]:
 
 
 def find_proof(item: dict) -> str | None:
+    """An explicit proof:/test:/cmd: marker on the criterion or a child line wins.
+
+    With no marker at all, fall back to a test-like token in child lines only:
+    a backticked word in the criterion itself names the outcome, not its proof.
+    """
+    marked = False
     for text in [item["text"]] + item["children"]:
         m = PROOF_MARKER_RE.search(text)
         if m:
+            marked = True
             value = m.group(1).strip()
             while value.endswith(")") and value.count(")") > value.count("("):
                 value = value[:-1].rstrip()
             if value and not VAGUE_PROOF_RE.match(value):
                 return value
-            continue
+    if marked:
+        return None
+    for text in item["children"]:
         t = PROOF_TOKEN_RE.search(text)
         if t:
             return t.group(0)
     return None
+
+
+def find_dependencies(sections: list[dict]) -> tuple[list[str], list[str], bool]:
+    """Return (issue refs, unresolved non-ref ids, dependencies stated as none).
+
+    Outside a Related section, a ref counts only after an explicit verb (depends on,
+    blocked by, requires). Inside a Dependencies section, a line that starts with
+    a ref counts too, unless it says the ref is only related.
+    """
+    refs: list[str] = []
+    unresolved: list[str] = []
+    none = False
+
+    def add(target: list[str], value: str) -> None:
+        if value not in target:
+            target.append(value)
+
+    for s in sections:
+        if s["kind"] == "related":
+            continue
+        for m in DEP_RE.finditer("\n".join([s["heading"]] + s["lines"])):
+            # "requires S3" is usually prose; only depends on / blocked by flag slice ids
+            slice_ok = m.group(1).lower() != "requires"
+            for token in re.split(r"\s*(?:,|&|\band\b)\s*", m.group(2), flags=re.IGNORECASE):
+                if REF_RE.fullmatch(token):
+                    add(refs, token)
+                elif token and slice_ok:
+                    add(unresolved, token)
+        if s["kind"] != "dependencies":
+            continue
+        texts = []
+        for line in s["lines"]:
+            m = ITEM_RE.match(line)
+            text = (m.group(3) if m else line).strip()
+            if text:
+                texts.append(text)
+        if not texts:
+            none = True
+        for text in texts:
+            bare = BARE_REF_RE.match(text)
+            if NONE_RE.match(text) or NONE_LEAD_RE.match(text):
+                none = True
+            elif bare and not NOT_DEP_RE.search(text):
+                for ref in REF_RE.findall(bare.group(1)):
+                    add(refs, ref)
+    return refs, unresolved, none
 
 
 def parse_issue(issue: dict) -> dict:
@@ -224,7 +289,8 @@ def parse_issue(issue: dict) -> dict:
     criteria_items = items_of("acceptance")
     criteria_source = "section" if criteria_items else None
     if not criteria_items:
-        skip = {"scope", "out_of_scope", "dependencies", "proof", "open_questions"}
+        skip = {"scope", "out_of_scope", "dependencies", "proof", "open_questions",
+                "assumptions", "related"}
         criteria_items = [it for s in sections if s["kind"] not in skip
                           for it in parse_items(s["lines"]) if it["checkbox"]]
         criteria_source = "checkboxes" if criteria_items else None
@@ -233,27 +299,18 @@ def parse_issue(issue: dict) -> dict:
         criteria_items = [{"text": g, "checkbox": False, "children": []} for g in gwt]
         criteria_source = "given-when-then" if criteria_items else None
 
-    dep_refs: list[str] = []
-    for m in DEP_RE.finditer(body):
-        for ref in REF_RE.findall(m.group(1)):
-            if ref not in dep_refs:
-                dep_refs.append(ref)
-    dep_sections = by_kind.get("dependencies", [])
-    deps_none = False
-    for s in dep_sections:
-        text = "\n".join(s["lines"]).strip()
-        for ref in REF_RE.findall(text):
-            if ref not in dep_refs:
-                dep_refs.append(ref)
-        items = parse_items(s["lines"])
-        if (items and all(NONE_RE.match(it["text"]) for it in items)) or NONE_RE.match(text or "-"):
-            deps_none = True
+    dep_refs, dep_unresolved, deps_none = find_dependencies(sections)
 
-    open_q = []
-    for s in by_kind.get("open_questions", []):
-        items = parse_items(s["lines"])
-        texts = [it["text"] for it in items] or [ln.strip() for ln in s["lines"] if ln.strip()]
-        open_q += [t for t in texts if not NONE_RE.match(t)]
+    def texts_of(kind):
+        out = []
+        for s in by_kind.get(kind, []):
+            items = parse_items(s["lines"])
+            texts = [it["text"] for it in items] or [ln.strip() for ln in s["lines"] if ln.strip()]
+            out += [t for t in texts if not NONE_RE.match(t)]
+        return out
+
+    open_q = texts_of("open_questions")
+    documented = texts_of("assumptions")
 
     return {
         "criteria": [{"text": it["text"], "proof": find_proof(it)} for it in criteria_items],
@@ -266,7 +323,10 @@ def parse_issue(issue: dict) -> dict:
         + [ln.strip() for s in by_kind.get("proof", []) for ln in s["lines"]
            if ln.strip() and not ITEM_RE.match(ln)],
         "dependencies": dep_refs,
-        "dependencies_none": deps_none and not dep_refs,
+        "dependencies_unresolved": dep_unresolved,
+        "dependencies_none": deps_none and not dep_refs and not dep_unresolved,
+        "documented_assumptions": documented,
+        "assumptions_documented": len(documented),
         "open_questions": open_q,
         "unresolved": sorted({m.group(0) for m in UNRESOLVED_RE.finditer(body)}),
         "headings": [s["heading"] for s in sections if s["heading"]],
@@ -320,7 +380,12 @@ def assess(issue: dict, max_items: int = MAX_ITEMS) -> dict:
     notes: list[str] = []
     if p["dependencies"]:
         notes.append("confirm these are merged before starting: " + ", ".join(p["dependencies"]))
-    elif not p["dependencies_none"]:
+    for dep in p["dependencies_unresolved"]:
+        assumptions.append(f'unresolved dependency "{dep}" is not an issue reference; '
+                           "replace it with the issue number before filing")
+    dep_documented = any(DOC_DEP_RE.search(a) for a in p["documented_assumptions"])
+    if not (p["dependencies"] or p["dependencies_unresolved"] or p["dependencies_none"]
+            or dep_documented):
         assumptions.append("no dependencies stated; assume none")
     for c in crit:
         words = sorted({m.group(1).lower() for m in VAGUE_RE.finditer(c["text"])})
@@ -357,10 +422,14 @@ def format_human(r: dict) -> str:
         lines.append("assumptions:")
         lines += [f"  - {a}" for a in r["assumptions"]]
     lines += [f"note: {n}" for n in r["notes"]]
-    deps = ", ".join(d["dependencies"]) or ("none" if d["dependencies_none"] else "not stated")
+    deps = ", ".join(d["dependencies"] + [f"{x} (unresolved)" for x in d["dependencies_unresolved"]])
+    if not deps and not d["dependencies_none"]:
+        documented = any(DOC_DEP_RE.search(a) for a in d["documented_assumptions"])
+        deps = "see Assumptions" if documented else "not stated"
+    deps = deps or "none"
     lines.append(f"detected: {len(d['criteria'])} criteria ({proven} with proof), "
                  f"{len(d['scope'])} scope items, {len(d['out_of_scope'])} out-of-scope items, "
-                 f"dependencies: {deps}")
+                 f"{d['assumptions_documented']} documented assumptions, dependencies: {deps}")
     return "\n".join(lines)
 
 
@@ -375,7 +444,11 @@ def main(argv: list[str] | None = None, runner=subprocess.run, which=shutil.whic
     ap.add_argument("--max-items", type=int, default=MAX_ITEMS,
                     help=f"max criteria or scope items before suggesting a split (default {MAX_ITEMS})")
     ap.add_argument("--strict", action="store_true", help="exit 1 on ready-with-assumptions too")
-    ap.add_argument("--json", action="store_true", help="print machine-readable JSON")
+    out = ap.add_mutually_exclusive_group()
+    out.add_argument("--json", action="store_true", help="print machine-readable JSON")
+    out.add_argument("--emit-body", action="store_true",
+                     help="print only the issue body (first # title line removed), e.g. for "
+                          "gh issue create --body-file; the verdict goes to stderr")
     args = ap.parse_args(argv)
 
     try:
@@ -403,7 +476,11 @@ def main(argv: list[str] | None = None, runner=subprocess.run, which=shutil.whic
         return 2
 
     result = assess(issue, args.max_items)
-    print(json.dumps(result, indent=2) if args.json else format_human(result))
+    if args.emit_body:
+        print(issue["body"].strip("\n"))
+        print(format_human(result), file=sys.stderr)
+    else:
+        print(json.dumps(result, indent=2) if args.json else format_human(result))
     if result["verdict"] == "not-ready":
         return 1
     if result["verdict"] == "ready-with-assumptions" and args.strict:

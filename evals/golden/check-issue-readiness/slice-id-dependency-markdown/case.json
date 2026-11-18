@@ -1,0 +1,7 @@
+{
+  "description": "a slice id dependency (Depends on S1) is reported as an unresolved-dependency assumption, not dropped",
+  "script": "check_issue.py",
+  "args": ["--file", "issue.md", "--json"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

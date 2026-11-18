@@ -1,0 +1,2 @@
+ready: Expire reset links in the notes app
+detected: 2 criteria (2 with proof), 1 scope items, 1 out-of-scope items, 2 documented assumptions, dependencies: see Assumptions

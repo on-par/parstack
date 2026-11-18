@@ -125,6 +125,116 @@ class ParsingTests(unittest.TestCase):
         self.assertEqual(r["detected"]["unresolved"], [])
 
 
+SCOPED = "## Scope\n- a\n## Out of scope\n- b\n"
+
+
+class ProofTests(unittest.TestCase):
+    def test_backtick_in_criterion_text_is_not_proof(self):
+        r = md("## Acceptance criteria\n- [ ] `syncMode: strict` is honored\n")
+        self.assertIsNone(r["detected"]["criteria"][0]["proof"])
+        self.assertEqual(r["verdict"], "not-ready")
+        self.assertIn("no proof named", r["missing"][0])
+
+    def test_proof_child_wins_over_backtick_in_criterion(self):
+        r = md("## Acceptance criteria\n- [ ] `syncMode: strict` is honored\n"
+               "  - proof: test_strict_sync\n")
+        self.assertEqual(r["detected"]["criteria"][0]["proof"], "test_strict_sync")
+
+    def test_token_fallback_reads_children_only(self):
+        items = ci.parse_items(["- `a` works", "  - `npm test -- a`"])
+        self.assertEqual(ci.find_proof(items[0]), "`npm test -- a`")
+        items = ci.parse_items(["- test_a_works passes"])
+        self.assertIsNone(ci.find_proof(items[0]))
+
+    def test_vague_marker_blocks_token_fallback(self):
+        items = ci.parse_items(["- a works", "  - proof: manual", "  - see `a.md`"])
+        self.assertIsNone(ci.find_proof(items[0]))
+
+
+class DependencyTests(unittest.TestCase):
+    def test_labelled_none_in_section(self):
+        r = md("## Acceptance criteria\n- x (proof: test_x)\n" + SCOPED
+               + "## Dependencies\nDependencies: None.\n")
+        self.assertTrue(r["detected"]["dependencies_none"])
+        self.assertEqual(r["verdict"], "ready", r)
+
+    def test_related_and_prose_refs_are_not_dependencies(self):
+        r = md("## Context\nThe reset email fails after #33 lands.\n"
+               "## Acceptance criteria\n- x (proof: test_x)\n" + SCOPED
+               + "## Dependencies\nDependencies: None. Builds on merged #12. Related: #40, #41\n"
+               "## Related\n- Depends on #50 for the old schema\n- #51\n")
+        d = r["detected"]
+        self.assertEqual(d["dependencies"], [])
+        self.assertTrue(d["dependencies_none"])
+        self.assertEqual(r["notes"], [])
+        self.assertEqual(r["verdict"], "ready", r)
+
+    def test_explicit_verbs_still_count(self):
+        r = md("Depends on #12. Blocked by #13.\n## Acceptance criteria\n- x (proof: test_x)\n"
+               "## Dependencies\n- Requires #14\n- #15\n- #16 (related)\n- See #17\n")
+        self.assertEqual(r["detected"]["dependencies"], ["#12", "#13", "#14", "#15"])
+        self.assertFalse(r["detected"]["dependencies_none"])
+
+    def test_slice_id_is_unresolved_dependency(self):
+        r = md("## Acceptance criteria\n- x (proof: test_x)\n" + SCOPED
+               + "## Dependencies\n- Depends on S1\n- Depends on #40\n")
+        d = r["detected"]
+        self.assertEqual(d["dependencies"], ["#40"])
+        self.assertEqual(d["dependencies_unresolved"], ["S1"])
+        text = "\n".join(r["assumptions"])
+        self.assertIn('unresolved dependency "S1"', text)
+        self.assertNotIn("no dependencies stated", text)
+        self.assertEqual(r["verdict"], "ready-with-assumptions")
+
+    def test_requires_prose_is_not_a_slice_id(self):
+        r = md("Requires S3 bucket access.\n## Acceptance criteria\n- x (proof: test_x)\n")
+        self.assertEqual(r["detected"]["dependencies_unresolved"], [])
+
+
+class AssumptionsSectionTests(unittest.TestCase):
+    BODY = "## Acceptance criteria\n- x (proof: test_x)\n" + SCOPED + "## Assumptions\n"
+
+    def test_documented_dependency_assumption_is_not_repeated(self):
+        r = md(self.BODY + "- No dependencies: the token table already exists\n- Times are UTC\n")
+        self.assertEqual(r["detected"]["assumptions_documented"], 2)
+        self.assertEqual(r["assumptions"], [])
+        self.assertEqual(r["verdict"], "ready")
+        self.assertIn("2 documented assumptions", ci.format_human(r))
+
+    def test_unrelated_documented_assumption_keeps_auto_assumption(self):
+        r = md(self.BODY + "- Times are UTC\n")
+        self.assertEqual(r["detected"]["assumptions_documented"], 1)
+        self.assertIn("no dependencies stated", " ".join(r["assumptions"]))
+
+    def test_open_questions_heading_wins_over_assumptions(self):
+        r = md(self.BODY.replace("## Assumptions", "## Open questions and assumptions")
+               + "- Which timezone?\n")
+        self.assertEqual(r["detected"]["open_questions"], ["Which timezone?"])
+        self.assertEqual(r["verdict"], "not-ready")
+
+    def test_assumptions_items_are_not_criteria(self):
+        r = md("Do it.\n## Assumptions\n- [ ] Times are UTC\n")
+        self.assertEqual(r["detected"]["criteria"], [])
+
+
+class EmitBodyTests(unittest.TestCase):
+    def test_emit_body_strips_title(self):
+        code, out = call(["--file", str(FIXTURES / "ready.md"), "--emit-body"])
+        self.assertEqual(code, 0)
+        self.assertTrue(out.startswith("## Context\n"), out)
+        self.assertNotIn("Expire password reset links", out)
+
+    def test_emit_body_keeps_verdict_exit_code(self):
+        code, out = call(["--file", str(FIXTURES / "not_ready.md"), "--emit-body"])
+        self.assertEqual(code, 1)
+        self.assertTrue(out.startswith("We should make onboarding nicer."), out)
+
+    def test_emit_body_and_json_conflict(self):
+        with self.assertRaises(SystemExit) as ctx:
+            call(["--file", str(FIXTURES / "ready.md"), "--emit-body", "--json"])
+        self.assertEqual(ctx.exception.code, 2)
+
+
 class GithubTests(unittest.TestCase):
     def test_gh_missing_is_skipped(self):
         code, out = call(["--gh", "5", "--json"], which=lambda _: None)

@@ -1,6 +1,7 @@
 {
   "assumptions": [],
   "detected": {
+    "assumptions_documented": 0,
     "criteria": [
       {
         "proof": "OrdersExportTests.DownloadsVisibleRows",
@@ -10,6 +11,8 @@
     "criteria_source": "section",
     "dependencies": [],
     "dependencies_none": true,
+    "dependencies_unresolved": [],
+    "documented_assumptions": [],
     "has_out_of_scope_section": true,
     "has_scope_section": true,
     "headings": [
