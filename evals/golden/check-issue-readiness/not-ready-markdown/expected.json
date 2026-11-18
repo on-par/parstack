@@ -5,10 +5,13 @@
     "no dependencies stated; assume none"
   ],
   "detected": {
+    "assumptions_documented": 0,
     "criteria": [],
     "criteria_source": null,
     "dependencies": [],
     "dependencies_none": false,
+    "dependencies_unresolved": [],
+    "documented_assumptions": [],
     "has_out_of_scope_section": false,
     "has_scope_section": false,
     "headings": [

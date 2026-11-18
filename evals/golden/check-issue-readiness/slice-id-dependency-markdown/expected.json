@@ -1,0 +1,49 @@
+{
+  "assumptions": [
+    "unresolved dependency \"S1\" is not an issue reference; replace it with the issue number before filing"
+  ],
+  "detected": {
+    "assumptions_documented": 0,
+    "criteria": [
+      {
+        "proof": "test_reset_page_shows_expired_state",
+        "text": "An expired reset link shows \"link expired\" and a resend button"
+      }
+    ],
+    "criteria_source": "section",
+    "dependencies": [
+      "#40"
+    ],
+    "dependencies_none": false,
+    "dependencies_unresolved": [
+      "S1"
+    ],
+    "documented_assumptions": [],
+    "has_out_of_scope_section": true,
+    "has_scope_section": true,
+    "headings": [
+      "Value",
+      "Scope",
+      "Acceptance criteria",
+      "Out of scope",
+      "Dependencies"
+    ],
+    "open_questions": [],
+    "out_of_scope": [
+      "Changing the reset email template"
+    ],
+    "proof_section_items": [],
+    "scope": [
+      "Render the expired state on the reset page"
+    ],
+    "unresolved": []
+  },
+  "labels": [],
+  "missing": [],
+  "notes": [
+    "confirm these are merged before starting: #40"
+  ],
+  "source": "markdown",
+  "title": "Show \"link expired\" on the notes app reset page",
+  "verdict": "ready-with-assumptions"
+}

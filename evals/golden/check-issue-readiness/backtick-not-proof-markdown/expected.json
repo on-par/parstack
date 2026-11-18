@@ -1,0 +1,46 @@
+{
+  "assumptions": [
+    "no proof for \"`syncMode: strict` is honored\"; assume a new automated test named after it proves it"
+  ],
+  "detected": {
+    "assumptions_documented": 0,
+    "criteria": [
+      {
+        "proof": null,
+        "text": "`syncMode: strict` is honored"
+      },
+      {
+        "proof": "test_lenient_sync_keeps_local_edits",
+        "text": "`syncMode: lenient` keeps local edits on conflict"
+      }
+    ],
+    "criteria_source": "section",
+    "dependencies": [],
+    "dependencies_none": true,
+    "dependencies_unresolved": [],
+    "documented_assumptions": [],
+    "has_out_of_scope_section": true,
+    "has_scope_section": true,
+    "headings": [
+      "Scope",
+      "Out of scope",
+      "Acceptance criteria",
+      "Dependencies"
+    ],
+    "open_questions": [],
+    "out_of_scope": [
+      "Adding new sync modes"
+    ],
+    "proof_section_items": [],
+    "scope": [
+      "Read `syncMode` from settings before each sync"
+    ],
+    "unresolved": []
+  },
+  "labels": [],
+  "missing": [],
+  "notes": [],
+  "source": "markdown",
+  "title": "Honor the sync mode setting in the notes app",
+  "verdict": "ready-with-assumptions"
+}

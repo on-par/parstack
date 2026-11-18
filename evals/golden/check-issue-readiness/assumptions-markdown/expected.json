@@ -7,6 +7,7 @@
     "vague wording (fast) in \"Results load fast for a 3-word query\"; assume its proof sets the bar"
   ],
   "detected": {
+    "assumptions_documented": 0,
     "criteria": [
       {
         "proof": null,
@@ -20,6 +21,8 @@
     "criteria_source": "section",
     "dependencies": [],
     "dependencies_none": false,
+    "dependencies_unresolved": [],
+    "documented_assumptions": [],
     "has_out_of_scope_section": false,
     "has_scope_section": false,
     "headings": [

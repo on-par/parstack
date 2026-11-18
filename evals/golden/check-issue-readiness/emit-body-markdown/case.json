@@ -1,0 +1,7 @@
+{
+  "description": "--emit-body prints the body without the # title line, ready for gh issue create --body-file; exit code follows the verdict",
+  "script": "check_issue.py",
+  "args": ["--file", "issue.md", "--emit-body"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

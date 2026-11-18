@@ -1,0 +1,42 @@
+{
+  "assumptions": [],
+  "detected": {
+    "assumptions_documented": 0,
+    "criteria": [
+      {
+        "proof": "test_expired_reset_link_rejected",
+        "text": "A 61-minute-old reset link shows \"link expired\""
+      }
+    ],
+    "criteria_source": "section",
+    "dependencies": [],
+    "dependencies_none": true,
+    "dependencies_unresolved": [],
+    "documented_assumptions": [],
+    "has_out_of_scope_section": true,
+    "has_scope_section": true,
+    "headings": [
+      "Context",
+      "Scope",
+      "Out of scope",
+      "Acceptance criteria",
+      "Dependencies",
+      "Related"
+    ],
+    "open_questions": [],
+    "out_of_scope": [
+      "Changing the reset email template"
+    ],
+    "proof_section_items": [],
+    "scope": [
+      "Reject reset tokens older than 60 minutes"
+    ],
+    "unresolved": []
+  },
+  "labels": [],
+  "missing": [],
+  "notes": [],
+  "source": "markdown",
+  "title": "Expire reset links in the notes app",
+  "verdict": "ready"
+}
