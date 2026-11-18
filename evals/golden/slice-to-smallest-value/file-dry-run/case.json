@@ -1,0 +1,7 @@
+{
+  "description": "file_slices dry run: S1 before S2 though listed second, title not repeated in the body, labels only from --label, pending S1 shown as a placeholder, external deps as written, readiness per issue, nothing posted",
+  "script": "file_slices.py",
+  "args": ["slices.json", "--repo", "acme/notes-app", "--label", "enhancement", "--label", "area: auth", "--parent-issue", "12"],
+  "cwd": "fixture",
+  "expect_exit": 0
+}

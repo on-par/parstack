@@ -16,7 +16,7 @@ Based on On PAR's factory method.
 
 ### Manage work going in
 
-- `slice-to-smallest-value` - break an ask into the smallest end-to-end slices of user-visible value, each with at most 5 scope items and 5 criteria and a named proof per criterion; check coverage, overlap, and dependency order.
+- `slice-to-smallest-value` - break an ask into the smallest end-to-end slices of user-visible value, each with at most 5 scope items and 5 criteria and a named proof per criterion; check coverage, overlap, and dependency order; file them as issues in run order (dry run by default).
 - `check-issue-readiness` - lint an issue for acceptance criteria, scope, dependencies, proof, size, and vague words; return ready, ready-with-assumptions, or not-ready.
 - `order-the-queue` - build the dependency graph of open issues, flag cycles, missing deps, stale and blocked items, and print run order as parallel groups.
 - `set-up-work-triggers` - generate a GitHub Actions workflow that starts a run from a label, a comment command, or a schedule, with double-start guards and minimal permissions.
@@ -52,6 +52,7 @@ Optional tools, used when present and reported as skipped when missing:
 - `enforce-module-boundaries`: dependency-cruiser (via npx), dotnet
 - `shrink-quality-budgets`: jscpd, knip, dependency-cruiser
 - `check-issue-readiness`, `order-the-queue`: gh
+- `slice-to-smallest-value`: gh, only for `file_slices.py --create`
 - `triage-failing-checks`: whatever the check command needs
 - `prune-low-signal-tests`: the repo's own test and coverage commands
 

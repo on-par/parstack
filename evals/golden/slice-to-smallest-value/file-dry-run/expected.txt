@@ -1,0 +1,66 @@
+PASS: 2 slices, 0 errors, 0 warnings
+dry run: 2 issues for acme/notes-app, in this order; nothing is posted (add --create to file them)
+
+[1/2] S1
+title: Request a reset link
+labels: enhancement, area: auth
+readiness: ready
+body:
+## Value
+A locked-out user can get back to their notes
+
+Part of #12
+
+## Context
+Tokens are stored in the existing sessions table.
+
+## Scope
+- Reset request form
+- Email with a one-time link
+
+## Files
+- `src/auth/reset.ts`
+- `web/pages/reset.tsx`
+
+## Acceptance criteria
+- [ ] Submitting a known email sends one link
+  - proof: tests/reset.test.ts::sends link
+
+## Out of scope
+- Link expiry
+
+## Dependencies
+- None
+
+[2/2] S2
+title: Expire reset links
+labels: enhancement, area: auth
+readiness: ready-with-assumptions
+  assumption: unresolved dependency "S1" is not an issue reference; replace it with the issue number before filing
+body:
+## Value
+An old reset email cannot be used to take over an account
+
+Part of #12
+
+## Scope
+- Store issued-at on the token
+- Reject tokens older than 60 minutes
+
+## Files
+- `src/auth/expiry.ts`
+
+## Acceptance criteria
+- [ ] A 61-minute-old link is rejected with a clear message
+  - proof: tests/reset.test.ts::expires
+
+## Out of scope
+- Configurable expiry time
+
+## Dependencies
+- Depends on S1 (not created yet)
+- Depends on #40
+- Depends on acme/api#7
+- Depends on PROJ-12
+
+Dependencies marked "(not created yet)" get their real issue numbers during --create.

@@ -37,6 +37,16 @@ def parse_issue_map(text: str | None) -> dict[str, str]:
     return out
 
 
+def parse_parent_issue(text: str | None) -> str | None:
+    """Parse "12" or "#12" into "#12"; None stays None."""
+    if text is None:
+        return None
+    num = text.strip().lstrip("#")
+    if not num.isdigit():
+        raise InputError(f"bad --parent-issue: {text!r} (want a number)")
+    return f"#{num}"
+
+
 def ordered(doc: dict) -> list[dict]:
     slices = [s for s in doc["slices"] if isinstance(s, dict) and s.get("id")]
     ids = [s["id"] for s in slices]
@@ -108,12 +118,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         doc = load_doc(args.path)
         issue_map = parse_issue_map(args.issue_map)
-        parent_issue = None
-        if args.parent_issue is not None:
-            num = args.parent_issue.strip().lstrip("#")
-            if not num.isdigit():
-                raise InputError(f"bad --parent-issue: {args.parent_issue!r} (want a number)")
-            parent_issue = f"#{num}"
+        parent_issue = parse_parent_issue(args.parent_issue)
     except InputError as exc:
         print(f"input error: {exc}", file=sys.stderr)
         return 2
